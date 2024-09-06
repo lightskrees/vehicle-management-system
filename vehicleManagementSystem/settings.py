@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'authentication.apps.AuthenticationConfig',
+    "django_extensions",
+    "authentication.apps.AuthenticationConfig",
+    "rest_framework",
 ]
 
 MIDDLEWARE = [
@@ -49,6 +51,16 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+REST_FRAMEWORK = {
+    # REST_FRAMEWORK CONFIGURATION SETTINGS,
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+            'rest_framework_simplejwt.authentication.JWTAuthentication',
+        ],
+}
 
 ROOT_URLCONF = "vehicleManagementSystem.urls"
 
