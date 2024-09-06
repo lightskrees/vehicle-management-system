@@ -10,7 +10,7 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    employeeID = models.IntegerField(unique=True)
+    employeeID = models.IntegerField(unique=True, null=True, blank=True)
 
     objects = CustomUserManager()
 
