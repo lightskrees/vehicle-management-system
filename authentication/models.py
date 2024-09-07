@@ -18,8 +18,12 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'email'
 
+    @property
+    def full_name(self):
+        return f'{self.first_name} {self.last_name}'
+
     def _str_(self):
-        return self.email
+        return f'{self.full_name}'
 
 
 class Driver(models.Model):
@@ -45,3 +49,12 @@ class Driver(models.Model):
     class Meta:
         ordering = ["license_category", "-expiry_date"]
         unique_together = ["user", "driving_license_number"]
+
+    def __str__(self):
+        return f"{self.user.full_name} :: {self.driving_license_number} :: {self.license_category}"
+
+    def have_valid_license(self):
+        if self.expiry_date > timezone.now().date() >= self.delivery_date:
+            return True
+        return False
+
