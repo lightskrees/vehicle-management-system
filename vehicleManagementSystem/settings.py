@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django_extensions",
     "authentication.apps.AuthenticationConfig",
     "rest_framework",
+    "management",
 ]
 
 MIDDLEWARE = [
