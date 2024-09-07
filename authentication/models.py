@@ -41,3 +41,7 @@ class Driver(models.Model):
                                         default=LicenseCategories.CATEGORY_B)
     delivery_date = models.DateField()
     expiry_date = models.DateField()
+
+    class Meta:
+        ordering = ["license_category", "-expiry_date"]
+        unique_together = ["user", "driving_license_number"]
