@@ -1,7 +1,13 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from authentication.models import AppUser
+from authentication.models import AppUser, Driver
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AppUser
+        fields = ['email', 'first_name', 'last_name', 'email', 'is_active']
 
 
 class AddUserSerializer(serializers.ModelSerializer):
