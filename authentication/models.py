@@ -45,6 +45,15 @@ class Driver(models.Model):
     driving_license_number = models.CharField(max_length=20)
     license_category = models.CharField(choices=LicenseCategories.choices, max_length=2,
                                         default=LicenseCategories.CATEGORY_B)
+    created_by = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.DO_NOTHING,
+        related_name="created_drivers",
+        related_query_name="created_driver",
+        limit_choices_to={'is_active': True},
+        blank=True,
+        null=True
+    )
     delivery_date = models.DateField()
     expiry_date = models.DateField()
 
