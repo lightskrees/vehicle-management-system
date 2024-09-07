@@ -1,9 +1,9 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from api.serializers import TokenSerializer, AddUserSerializer, RegisterDriverSerializer
+from api.serializers import TokenSerializer, AddUserSerializer, RegisterDriverSerializer, DriverSerializer
 from authentication.models import AppUser, Driver
 
 
@@ -32,6 +32,11 @@ class AddUserView(GenericAPIView):
                 'response_message': serializer.errors
             }
         )
+
+
+class DriverListView(ListAPIView):
+    serializer_class = DriverSerializer
+    queryset = Driver.objects.all()
 
 
 class RegisterDriverView(GenericAPIView):
