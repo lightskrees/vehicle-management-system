@@ -16,6 +16,7 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
     employeeID = models.IntegerField(unique=True, null=True, blank=True)
 
     objects = AppUserManager()
+    inactive = DeactivatedUserManager()
 
     USERNAME_FIELD = 'email'
 
