@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from authentication.managers import AppUserManager
+from authentication.managers import AppUserManager, DeactivatedUserManager
 
 
 class AppUser(AbstractBaseUser, PermissionsMixin):
