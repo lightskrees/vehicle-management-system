@@ -9,6 +9,8 @@ from authentication.managers import CustomUserManager
 class AppUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     is_staff = models.BooleanField(default=False)
+    first_name = models.CharField(max_length=100, verbose_name=_('first name'), null=True, blank=True)
+    last_name = models.CharField(max_length=100, verbose_name=_('last name'), null=True, blank=True)
     is_active = models.BooleanField(default=True)
     employeeID = models.IntegerField(unique=True, null=True, blank=True)
 
