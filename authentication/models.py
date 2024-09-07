@@ -24,6 +24,10 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
     def full_name(self):
         return f'{self.first_name} {self.last_name}'
 
+    @property
+    def is_administrator(self):
+        return True if self.is_superuser else False
+
     def _str_(self):
         return f'{self.full_name}'
 
