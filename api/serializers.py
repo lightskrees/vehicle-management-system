@@ -16,6 +16,35 @@ class AddUserSerializer(serializers.ModelSerializer):
         fields = ('first_name', 'last_name', 'email', 'password', 'employeeID')
 
 
+class DriverSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    have_valid_license = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Driver
+        fields = ['user', 'driving_license_number', 'delivery_date', 'expiry_date', 'driving_license_file', 'have_valid_license']
+
+    def get_have_valid_license(self, obj):
+        return obj.have_valid_license()
+
+
+class RegisterDriverSerializer(serializers.ModelSerializer):
+    # user = serializers.PrimaryKeyRelatedField(queryset=AppUser.objects.all())
+
+    class Meta:
+        model = Driver
+        fields = ['user', 'driving_license_number', 'delivery_date', 'expiry_date', 'driving_license_file']
+
+    def validate_user(self, value):
+        try:
+            user = AppUser.objects.get(id=value.id)
+            if not user.is_active:
+                raise serializers.ValidationError('User account is disabled.')
+            return value
+        except AppUser.DoesNotExist:
+            raise serializers.ValidationError('User account not found.')
+
+
 class TokenSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
