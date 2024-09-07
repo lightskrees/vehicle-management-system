@@ -1,4 +1,13 @@
+from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+from authentication.models import AppUser
+
+
+class AddUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AppUser
+        fields = ('first_name', 'last_name', 'email', 'password', 'employeeID')
 
 
 class TokenSerializer(TokenObtainPairSerializer):
@@ -16,10 +25,10 @@ class TokenSerializer(TokenObtainPairSerializer):
         token_data = super().validate(attrs)
 
         user_details = {
-                "user_id": self.user.id,
-                "username": self.user.email,
-                "first_name": self.user.first_name,
-                "last_name": self.user.last_name,
+            "user_id": self.user.id,
+            "username": self.user.email,
+            "first_name": self.user.first_name,
+            "last_name": self.user.last_name,
         }
         data = {"user": user_details, **token_data}
         return data
