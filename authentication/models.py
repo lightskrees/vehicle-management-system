@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from authentication.managers import CustomUserManager
+from authentication.managers import AppUserManager
 
 
 class AppUser(AbstractBaseUser, PermissionsMixin):
@@ -15,7 +15,7 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     employeeID = models.IntegerField(unique=True, null=True, blank=True)
 
-    objects = CustomUserManager()
+    objects = AppUserManager()
 
     USERNAME_FIELD = 'email'
 
