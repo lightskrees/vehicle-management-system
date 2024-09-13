@@ -35,3 +35,10 @@ class Vehicle(TimeStampModel):
     class Meta:
         ordering = ['-year', 'make', 'model']
         unique_together = ('make', 'model', 'year', 'vin_number')
+
+class VehicleDriverAssignment(TimeStampModel):
+    driver = models.ForeignKey("authentication.AppUser", on_delete=models.CASCADE, related_name='assignments', related_query_name='assignment')
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='assignments', related_query_name='assignment')
+    begin_at = models.DateField()
+    ends_at = models.DateField()
+    objects = models.Manager()
