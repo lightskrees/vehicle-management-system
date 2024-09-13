@@ -1,8 +1,15 @@
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext as _
 
+class TimeStampModel(models.Model):
+    created_by = models.ForeignKey('authentication.AppUser', on_delete=models.DO_NOTHING, blank=True, null=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(null=True, blank=True)
+    class Meta:
+        abstract = True
 
-class Vehicle(models.Model):
+class Vehicle(TimeStampModel):
     class VehicleType(models.TextChoices):
         MOTORCYCLE = 'motorcycle', _('Motorcycle')
         CAR = 'car', _('Car')
@@ -28,7 +35,3 @@ class Vehicle(models.Model):
     class Meta:
         ordering = ['-year', 'make', 'model']
         unique_together = ('make', 'model', 'year', 'vin_number')
-
-
-
-
