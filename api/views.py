@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from rest_framework import viewsets, mixins
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -20,18 +21,10 @@ class AddUserView(GenericAPIView):
 
         if serializer.is_valid():
             serializer.save()
-            return Response({
-                'success': True,
-                'response_message': 'User created successfully!',
-                "response_data": serializer.data
-            }
+            return Response(
+                {"success": True, "response_message": "User created successfully!", "response_data": serializer.data}
             )
-        return Response(
-            {
-                'success': False,
-                'response_message': serializer.errors
-            }
-        )
+        return Response({"success": False, "response_message": serializer.errors})
 
 
 class DriverListView(ListAPIView):
@@ -39,25 +32,31 @@ class DriverListView(ListAPIView):
     queryset = Driver.objects.all()
 
 
-class RegisterDriverView(GenericAPIView):
+class DriverViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
     serializer_class = RegisterDriverSerializer
     queryset = Driver.objects.all()
 
-    def post(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            serializer.validated_data['created_by'] = request.user
+            serializer.validated_data["created_by"] = request.user
             serializer.save()
             return Response(
                 {
-                    'success': True,
-                    'response_message': 'Driver registered successfully!',
-                    'response_data': serializer.data
+                    "success": True,
+                    "response_message": "Driver registered successfully!",
+                    "response_data": serializer.data,
                 }
             )
         return Response(
             {
-                'success': False,
-                'response_message': serializer.errors,
+                "success": False,
+                "response_message": serializer.errors,
             }
         )
