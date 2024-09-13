@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -41,12 +42,31 @@ class Vehicle(TimeStampModel):
 
 
 class VehicleDriverAssignment(TimeStampModel):
+
+    class AssignmentStatus(models.TextChoices):
+        ACTIVE = "A", _("active")
+        INACTIVE = "I", _("inactive")
+
     driver = models.ForeignKey(
         "authentication.AppUser", on_delete=models.CASCADE, related_name="assignments", related_query_name="assignment"
     )
     vehicle = models.ForeignKey(
         Vehicle, on_delete=models.CASCADE, related_name="assignments", related_query_name="assignment"
     )
+    assignment_status = models.CharField(choices=AssignmentStatus.choices, max_length=1)
     begin_at = models.DateField()
     ends_at = models.DateField()
+
     objects = models.Manager()
+
+    def clean(self):
+        if self.begin_at > self.ends_at:
+            raise ValidationError({"date": _("Th assignment begin date must be lower than the end date.")})
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        created = self.pk is None
+        if created:
+            self.assignment_status = self.AssignmentStatus.choices.ACTIVE
+
+        super().save(self, *args, **kwargs)
