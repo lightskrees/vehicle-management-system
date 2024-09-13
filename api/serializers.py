@@ -7,13 +7,13 @@ from authentication.models import AppUser, Driver
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = AppUser
-        fields = ['email', 'first_name', 'last_name', 'email', 'is_active']
+        fields = ["email", "first_name", "last_name", "email", "is_active"]
 
 
 class AddUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = AppUser
-        fields = ('first_name', 'last_name', 'email', 'password', 'employeeID')
+        fields = ("first_name", "last_name", "email", "password", "employeeID")
 
 
 class DriverSerializer(serializers.ModelSerializer):
@@ -22,7 +22,14 @@ class DriverSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Driver
-        fields = ['user', 'driving_license_number', 'delivery_date', 'expiry_date', 'driving_license_file', 'have_valid_license']
+        fields = [
+            "user",
+            "driving_license_number",
+            "delivery_date",
+            "expiry_date",
+            "driving_license_file",
+            "have_valid_license",
+        ]
 
     def get_have_valid_license(self, obj):
         return obj.have_valid_license()
@@ -33,16 +40,16 @@ class RegisterDriverSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Driver
-        fields = ['user', 'driving_license_number', 'delivery_date', 'expiry_date', 'driving_license_file']
+        fields = ["user", "driving_license_number", "delivery_date", "expiry_date", "driving_license_file"]
 
     def validate_user(self, value):
         try:
             user = AppUser.objects.get(id=value.id)
             if not user.is_active:
-                raise serializers.ValidationError('User account is disabled.')
+                raise serializers.ValidationError("User account is disabled.")
             return value
         except AppUser.DoesNotExist:
-            raise serializers.ValidationError('User account not found.')
+            raise serializers.ValidationError("User account not found.")
 
 
 class TokenSerializer(TokenObtainPairSerializer):
@@ -50,9 +57,9 @@ class TokenSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token_data = super().get_token(user)
 
-        token_data['first_name'] = user.first_name
-        token_data['last_name'] = user.last_name
-        token_data['username'] = user.email
+        token_data["first_name"] = user.first_name
+        token_data["last_name"] = user.last_name
+        token_data["username"] = user.email
 
         return token_data
 

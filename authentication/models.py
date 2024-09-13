@@ -10,26 +10,26 @@ from authentication.managers import AppUserManager, DeactivatedUserManager
 class AppUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     is_staff = models.BooleanField(default=False)
-    first_name = models.CharField(max_length=100, verbose_name=_('first name'), null=True, blank=True)
-    last_name = models.CharField(max_length=100, verbose_name=_('last name'), null=True, blank=True)
+    first_name = models.CharField(max_length=100, verbose_name=_("first name"), null=True, blank=True)
+    last_name = models.CharField(max_length=100, verbose_name=_("last name"), null=True, blank=True)
     is_active = models.BooleanField(default=True)
     employeeID = models.IntegerField(unique=True, null=True, blank=True)
 
     objects = AppUserManager()
     inactive = DeactivatedUserManager()
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
 
     @property
     def full_name(self):
-        return f'{self.first_name} {self.last_name}'
+        return f"{self.first_name} {self.last_name}"
 
     @property
     def is_administrator(self):
         return True if self.is_superuser else False
 
     def _str_(self):
-        return f'{self.full_name}'
+        return f"{self.full_name}"
 
 
 class Driver(models.Model):
@@ -43,20 +43,22 @@ class Driver(models.Model):
         CATEGORY_E = "E", _("Category E")
         CATEGORY_F = "F", _("Category F")
 
-    user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name="driver",
-                                related_query_name="drivers")
+    user = models.OneToOneField(
+        get_user_model(), on_delete=models.CASCADE, related_name="driver", related_query_name="drivers"
+    )
     driving_license_file = models.ImageField(blank=True, null=True)
     driving_license_number = models.CharField(max_length=20)
-    license_category = models.CharField(choices=LicenseCategories.choices, max_length=2,
-                                        default=LicenseCategories.CATEGORY_B)
+    license_category = models.CharField(
+        choices=LicenseCategories.choices, max_length=2, default=LicenseCategories.CATEGORY_B
+    )
     created_by = models.ForeignKey(
         get_user_model(),
         on_delete=models.DO_NOTHING,
         related_name="created_drivers",
         related_query_name="created_driver",
-        limit_choices_to={'is_active': True},
+        limit_choices_to={"is_active": True},
         blank=True,
-        null=True
+        null=True,
     )
     delivery_date = models.DateField()
     expiry_date = models.DateField()
@@ -72,4 +74,3 @@ class Driver(models.Model):
         if self.expiry_date > timezone.now().date() >= self.delivery_date:
             return True
         return False
-
