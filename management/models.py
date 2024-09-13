@@ -53,7 +53,9 @@ class VehicleDriverAssignment(TimeStampModel):
     vehicle = models.ForeignKey(
         Vehicle, on_delete=models.CASCADE, related_name="assignments", related_query_name="assignment"
     )
-    assignment_status = models.CharField(choices=AssignmentStatus.choices, max_length=1)
+    assignment_status = models.CharField(
+        choices=AssignmentStatus.choices, max_length=1, default=AssignmentStatus.ACTIVE
+    )
     begin_at = models.DateField()
     ends_at = models.DateField()
 
