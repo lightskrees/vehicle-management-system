@@ -34,12 +34,12 @@ class Vehicle(TimeStampModel):
     purchase_date = models.DateField(null=True, blank=True)
     last_service_date = models.DateField(null=True, blank=True)
 
-    def __str__(self):
-        return f"{self.make} - {self.model} ({self.year})"
-
     class Meta:
         ordering = ["-year", "make", "model"]
         unique_together = ("make", "model", "year", "vin_number")
+
+    def __str__(self):
+        return f"{self.make} - {self.model} ({self.year})"
 
 
 class VehicleDriverAssignment(TimeStampModel):
@@ -78,9 +78,6 @@ class VehicleDriverAssignment(TimeStampModel):
     def save(self, *args, **kwargs):
         self.clean()
         created = self.pk is None
-        if created:
-            self.assignment_status = self.AssignmentStatus.choices.ACTIVE
-
         super().save(self, *args, **kwargs)
 
     def __str__(self):
