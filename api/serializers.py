@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from authentication.models import AppUser, Driver
+from management.models import Vehicle, VehicleTechnician
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -74,3 +75,26 @@ class TokenSerializer(TokenObtainPairSerializer):
         }
         data = {"user": user_details, **token_data}
         return data
+
+
+class VehicleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vehicle
+        fields = "__all__"
+
+
+class VehicleTechnicianSerializer(serializers.ModelSerializer):
+    managed_vehicles = serializers.PrimaryKeyRelatedField(queryset=Vehicle.objects.all(), many=True, read_only=False)
+
+    class Meta:
+        model = VehicleTechnician
+        fields = ("user", "managed_vehicles", "begin_date", "end_date")
+
+
+class VehicleTechnicianListSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    managed_vehicles = VehicleSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = VehicleTechnician
+        fields = ("user", "managed_vehicles", "begin_date", "end_date")
