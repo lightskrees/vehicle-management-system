@@ -61,6 +61,15 @@ class VehicleDriverAssignment(TimeStampModel):
 
     objects = models.Manager()
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=("driver", "vehicle"),
+                condition=Q(assignment_status="A"),
+                name="unique_active_driver_vehicle_assignment",
+            )
+        ]
+
     def clean(self):
         if self.begin_at > self.ends_at:
             raise ValidationError({"date": _("Th assignment begin date must be lower than the end date.")})
