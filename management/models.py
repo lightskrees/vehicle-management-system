@@ -82,3 +82,20 @@ class VehicleDriverAssignment(TimeStampModel):
             self.assignment_status = self.AssignmentStatus.choices.ACTIVE
 
         super().save(self, *args, **kwargs)
+
+    def __str__(self):
+        return f"{self.driver} assigned to {self.vehicle} - {self.get_assignment_status_display()}"
+
+
+class VehicleTechnician(TimeStampModel):
+    user = models.OneToOneField(
+        "authentication.AppUser", on_delete=models.DO_NOTHING, related_name="user", related_query_name="user"
+    )
+    managed_vehicles = models.ManyToManyField(
+        Vehicle, related_name="technician", related_query_name="managing_technician"
+    )
+    begin_date = models.DateField()
+    end_date = models.DateField()
+
+    def __str__(self):
+        return f"{self.user} :: {self.begin_date} - {self.end_date}"
