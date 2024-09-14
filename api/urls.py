@@ -1,11 +1,12 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
-from api.views import TokenPairView
-from api.views import AddUserView, DriverViewSet, DriverListView
+
+from api.views import AddUserView, DriverListView, DriverViewSet, TokenPairView, VehicleTechnicianViewSet
 
 router = DefaultRouter(trailing_slash=False)
 router.register(r"driver", DriverViewSet, basename="driver")
+router.register(r"vehicle", VehicleTechnicianViewSet, basename="vehicle")
 
 urlpatterns = [
     path("user/add-user/", AddUserView.as_view(), name="add_user"),

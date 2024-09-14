@@ -1,11 +1,20 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from rest_framework import viewsets, mixins
+from django.utils.translation import gettext as _
+from rest_framework import mixins, viewsets
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from api.serializers import TokenSerializer, AddUserSerializer, RegisterDriverSerializer, DriverSerializer
+from api.serializers import (
+    AddUserSerializer,
+    DriverSerializer,
+    RegisterDriverSerializer,
+    TokenSerializer,
+    VehicleTechnicianListSerializer,
+    VehicleTechnicianSerializer,
+)
 from authentication.models import AppUser, Driver
+from management.models import VehicleTechnician
 
 
 class TokenPairView(TokenObtainPairView):
@@ -50,7 +59,7 @@ class DriverViewSet(
             return Response(
                 {
                     "success": True,
-                    "response_message": "Driver registered successfully!",
+                    "response_message": _("Driver registered successfully!"),
                     "response_data": serializer.data,
                 }
             )
@@ -58,5 +67,42 @@ class DriverViewSet(
             {
                 "success": False,
                 "response_message": serializer.errors,
+            }
+        )
+
+
+class VehicleTechnicianViewSet(viewsets.ModelViewSet):
+    queryset = VehicleTechnician.objects.all()
+    serializer_class = VehicleTechnicianSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data, context=self.get_serializer())
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {
+                    "success": True,
+                    "response_message": _("A vehicle technician created successfully!"),
+                    "response_data": serializer.data,
+                }
+            )
+        return Response({"success": False, "response_message": serializer.errors})
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if not queryset:
+            return Response({"response_message": _("No vehicles registered yet.")})
+
+        return Response(
+            {
+                "success": True,
+                "response_message": _("Vehicles found."),
+                "response_data": VehicleTechnicianListSerializer(queryset=queryset).data,
             }
         )
