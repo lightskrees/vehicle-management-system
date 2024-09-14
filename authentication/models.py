@@ -1,6 +1,6 @@
-from django.db import models
-from django.contrib.auth.models import AbstractUser, AbstractBaseUser, PermissionsMixin
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractBaseUser, AbstractUser, PermissionsMixin
+from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
@@ -29,7 +29,9 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
         return True if self.is_superuser else False
 
     def _str_(self):
-        return f"{self.full_name}"
+        if self.first_name and self.last_name:
+            return f"{self.full_name}"
+        return self.email
 
 
 class Driver(models.Model):
@@ -68,6 +70,7 @@ class Driver(models.Model):
         unique_together = ["user", "driving_license_number"]
 
     def __str__(self):
+
         return f"{self.user.full_name} :: {self.driving_license_number} :: {self.license_category}"
 
     def have_valid_license(self):

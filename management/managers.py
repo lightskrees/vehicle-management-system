@@ -1,6 +1,6 @@
 from django.apps import apps
-from django.utils import timezone
 from django.db import models
+from django.utils import timezone
 
 from management.models import VehicleDriverAssignment
 
