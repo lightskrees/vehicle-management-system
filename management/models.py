@@ -65,9 +65,9 @@ class VehicleDriverAssignment(TimeStampModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=("driver", "vehicle"),
+                fields=["vehicle"],
                 condition=Q(assignment_status="A"),
-                name="unique_active_driver_vehicle_assignment",
+                name="unique_active_vehicle_assignment",
             )
         ]
 
