@@ -27,7 +27,7 @@ class Vehicle(TimeStampModel):
     year = models.IntegerField()
     vehicle_type = models.CharField(max_length=10, choices=VehicleType.choices, default=VehicleType.CAR)
     vin_number = models.CharField(max_length=17, unique=True)
-    vehicle_image = models.ImageField(upload_to="media/vehicles/")
+    vehicle_image = models.ImageField(upload_to="media/vehicles/", null=True, blank=True)
     color = models.CharField(max_length=20, null=True, blank=True)
     mileage = models.PositiveIntegerField(null=True, blank=True)
     license_plate_number = models.CharField(max_length=10, unique=True)
