@@ -78,7 +78,7 @@ class VehicleDriverAssignment(TimeStampModel):
     def save(self, *args, **kwargs):
         self.clean()
         created = self.pk is None
-        super().save(self, *args, **kwargs)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.driver} assigned to {self.vehicle} - {self.get_assignment_status_display()}"
