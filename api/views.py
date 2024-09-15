@@ -1,3 +1,4 @@
+from django.db.utils import IntegrityError
 from django.utils.translation import gettext as _
 from rest_framework import mixins, viewsets
 from rest_framework.generics import GenericAPIView, ListAPIView
@@ -154,6 +155,13 @@ class VehicleDriverAssignmentCreationView(APIView):
                 {
                     "success": True,
                     "response_message": serializer.errors,
+                }
+            )
+        except IntegrityError:
+            return Response(
+                {
+                    "success": False,
+                    "response_message": _("the specified vehicle is currently assigned to another person."),
                 }
             )
         except Exception as e:
