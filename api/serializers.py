@@ -80,7 +80,17 @@ class TokenSerializer(TokenObtainPairSerializer):
 class VehicleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vehicle
-        fields = "__all__"
+        fields = (
+            "make",
+            "model",
+            "year",
+            "vehicle_type",
+            "vin_number",
+            "vehicle_image",
+            "color",
+            "license_plate_number",
+            "purchase_date",
+        )
 
 
 class VehicleTechnicianSerializer(serializers.ModelSerializer):

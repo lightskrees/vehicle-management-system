@@ -1,8 +1,10 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.translation import gettext as _
 from rest_framework import mixins, viewsets
+from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from api.serializers import (
@@ -10,11 +12,12 @@ from api.serializers import (
     DriverSerializer,
     RegisterDriverSerializer,
     TokenSerializer,
+    VehicleSerializer,
     VehicleTechnicianListSerializer,
     VehicleTechnicianSerializer,
 )
 from authentication.models import AppUser, Driver
-from management.models import VehicleTechnician
+from management.models import Vehicle, VehicleTechnician
 
 
 class TokenPairView(TokenObtainPairView):
@@ -49,6 +52,7 @@ class DriverViewSet(
     viewsets.GenericViewSet,
 ):
     serializer_class = RegisterDriverSerializer
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
     queryset = Driver.objects.all()
 
     def create(self, request, *args, **kwargs):
@@ -69,6 +73,20 @@ class DriverViewSet(
                 "response_message": serializer.errors,
             }
         )
+
+
+class VehicleViewSet(mixins.CreateModelMixin, GenericViewSet):
+    queryset = Vehicle.objects.all()
+    serializer_class = VehicleSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"success": True, "response_message": _("New Vehicle registered!"), "response_data": serializer.data}
+            )
+        return Response({"success": False, "response_message": serializer.errors})
 
 
 class VehicleTechnicianViewSet(viewsets.ModelViewSet):
