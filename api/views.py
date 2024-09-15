@@ -1,9 +1,9 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.translation import gettext as _
 from rest_framework import mixins, viewsets
-from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 from rest_framework.generics import GenericAPIView, ListAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -12,12 +12,13 @@ from api.serializers import (
     DriverSerializer,
     RegisterDriverSerializer,
     TokenSerializer,
+    VehicleDriverAssignmentSerializer,
     VehicleSerializer,
     VehicleTechnicianListSerializer,
     VehicleTechnicianSerializer,
 )
 from authentication.models import AppUser, Driver
-from management.models import Vehicle, VehicleTechnician
+from management.models import Vehicle, VehicleDriverAssignment, VehicleTechnician
 
 
 class TokenPairView(TokenObtainPairView):
@@ -52,8 +53,14 @@ class DriverViewSet(
     viewsets.GenericViewSet,
 ):
     serializer_class = RegisterDriverSerializer
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    detail_serializer_class = DriverSerializer
+    permission_classes = [IsAuthenticated]
     queryset = Driver.objects.all()
+
+    def get_serializer_class(self):
+        if self.action == "retrieve" or self.action == "list":
+            if hasattr(self, "detail_serializer_class"):
+                return self.detail_serializer_class
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -99,7 +106,7 @@ class VehicleTechnicianViewSet(viewsets.ModelViewSet):
         return context
 
     def create(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data, context=self.get_serializer())
+        serializer = self.serializer_class(data=request.data, context=self.get_serializer_context())
 
         if serializer.is_valid():
             serializer.save()
@@ -124,3 +131,32 @@ class VehicleTechnicianViewSet(viewsets.ModelViewSet):
                 "response_data": VehicleTechnicianListSerializer(queryset=queryset).data,
             }
         )
+
+
+class VehicleDriverAssignmentCreationView(APIView):
+
+    def get_queryset(self):
+        return VehicleDriverAssignment.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = VehicleDriverAssignmentSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(
+                    {
+                        "success": True,
+                        "response_message": _("Vehicle assigned successfully!"),
+                        "response_data": serializer.data,
+                    }
+                )
+            return Response(
+                {
+                    "success": True,
+                    "response_message": serializer.errors,
+                }
+            )
+        except Exception as e:
+            return Response(
+                {"success": False, "response_message": _(f"Failed to assign the given driver because {str(e)}")}
+            )
