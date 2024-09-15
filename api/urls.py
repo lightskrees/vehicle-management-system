@@ -7,6 +7,7 @@ from api.views import (
     DriverListView,
     DriverViewSet,
     TokenPairView,
+    VehicleDriverAssignmentCreationView,
     VehicleTechnicianViewSet,
     VehicleViewSet,
 )
@@ -19,6 +20,9 @@ router.register("vehicle", VehicleViewSet, basename="vehicle")
 urlpatterns = [
     path("user/add-user/", AddUserView.as_view(), name="add_user"),
     path("driver/list/", DriverListView.as_view(), name="driver-list"),
+    path(
+        "vehicle/driver-assignment/", VehicleDriverAssignmentCreationView.as_view(), name="vehicle-driver-assignment"
+    ),
     path("", include(router.urls)),
     path("auth/", include("rest_framework.urls")),
     path("token/", TokenPairView.as_view(), name="token_obtain_pair"),
