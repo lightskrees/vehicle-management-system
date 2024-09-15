@@ -73,7 +73,7 @@ class VehicleDriverAssignment(TimeStampModel):
 
     def clean(self):
         if self.begin_at > self.ends_at:
-            raise ValidationError({"date": _("Th assignment begin date must be lower than the end date.")})
+            raise ValidationError(_("The begin date must be lower than the end date."))
 
     def save(self, *args, **kwargs):
         self.clean()
