@@ -4,7 +4,21 @@ from django.utils.translation import gettext_lazy as _
 from management.models import TimeStampModel
 
 
-class VehicleMaintenance(TimeStampModel):
+class PaymentMixin(models.Model):
+    class PaymentMethods(models.TextChoices):
+        CASH = "CASH", _("Cash")
+        BANK = "BANK", _("Bank")
+        MOBILE = "MOBILE", _("Mobile")
+
+    payment_date = models.DateField(null=True, blank=True, verbose_name=_("Payment date"))
+    payment_amount = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Payment amount"))
+    payment_method = models.CharField(choices=PaymentMethods.choices, default=PaymentMethods.CASH)
+
+    class Meta:
+        abstract = True
+
+
+class VehicleMaintenance(TimeStampModel, PaymentMixin):
     class Status(models.TextChoices):
         PENDING = "PENDING", _("pending")
         APPROVED = "APPROVED", _("approved")
