@@ -6,13 +6,13 @@ from management.models import TimeStampModel
 
 class PaymentMixin(models.Model):
     class PaymentMethods(models.TextChoices):
-        CASH = "CASH", _("Cash")
-        BANK = "BANK", _("Bank")
-        MOBILE = "MOBILE", _("Mobile")
+        CASH = "C", _("Cash")
+        BANK = "B", _("Bank")
+        MOBILE = "M", _("Mobile")
 
     payment_date = models.DateField(null=True, blank=True, verbose_name=_("Payment date"))
     payment_amount = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Payment amount"))
-    payment_method = models.CharField(choices=PaymentMethods.choices, default=PaymentMethods.CASH)
+    payment_method = models.CharField(max_length=1, choices=PaymentMethods.choices, default=PaymentMethods.CASH)
 
     class Meta:
         abstract = True
@@ -20,10 +20,10 @@ class PaymentMixin(models.Model):
 
 class VehicleMaintenance(TimeStampModel, PaymentMixin):
     class Status(models.TextChoices):
-        PENDING = "PENDING", _("pending")
-        APPROVED = "APPROVED", _("approved")
-        REJECTED = "REJECTED", _("rejected")
-        CANCELED = "CANCELED", _("canceled")
+        PENDING = "P", _("pending")
+        APPROVED = "A", _("approved")
+        REJECTED = "R", _("rejected")
+        CANCELED = "C", _("canceled")
 
     name = models.CharField(max_length=100, null=True, blank=True, verbose_name=_("name"))
     issue_report = models.ForeignKey(
@@ -34,7 +34,7 @@ class VehicleMaintenance(TimeStampModel, PaymentMixin):
         related_name="maintenances",
         related_query_name="maintenance",
     )
-    status = models.CharField(choices=Status.choices, default=Status.PENDING, max_length=20)
+    status = models.CharField(choices=Status.choices, default=Status.PENDING, max_length=1)
     vehicle = models.ForeignKey(
         "management.Vehicle", on_delete=models.PROTECT, related_name="maintenances", related_query_name="maintenance"
     )
@@ -56,8 +56,8 @@ class VehicleMaintenance(TimeStampModel, PaymentMixin):
 
     def __str__(self):
         if self.required_issue_report:
-            return f"Maintenance Cost for {self.issue_report} by {self.maintenance_partnership}"
-        return f"Maintenance Cost for {self.name} by {self.maintenance_partnership}"
+            return f"Maintenance Cost for {self.issue_report} by {self.partner}"
+        return f"Maintenance Cost for {self.name} by {self.partner}"
 
 
 class DocumentCost(TimeStampModel, PaymentMixin):
@@ -73,8 +73,8 @@ class DocumentCost(TimeStampModel, PaymentMixin):
 class FuelConsumption(TimeStampModel, PaymentMixin):
 
     class QuantityType(models.TextChoices):
-        LITER = "LITER", _("liter")
-        KWH = "KWH", _("kWh")
+        LITER = "l", _("liter")
+        KWH = "kWh", _("kWh")
 
     vehicle = models.ForeignKey(
         "management.Vehicle",
@@ -83,17 +83,17 @@ class FuelConsumption(TimeStampModel, PaymentMixin):
         related_query_name="fuel_consumption",
     )
     fuel_type = models.ForeignKey(
-        "vehicleHub.FuelType",
+        "vehicleHub.Fuel",
         on_delete=models.PROTECT,
         related_name="fuel_consumptions",
         related_query_name="fuel_consumption",
     )
-    quantity_type = models.CharField(choices=QuantityType.choices, max_length=20, default=QuantityType.LITER)
+    quantity_type = models.CharField(max_length=3, choices=QuantityType.choices, default=QuantityType.LITER)
     quantity = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     fuel_cost = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("fuel cost"))
     date = models.DateField(null=True, blank=True, verbose_name=_("Fuel Consumption date"))
     partner = models.ForeignKey(
-        "management.Partner",
+        "vehicleHub.Partner",
         on_delete=models.PROTECT,
         related_name="fuel_consumptions",
         related_query_name="fuel_consumption",
@@ -115,7 +115,7 @@ class FinancialRecord(TimeStampModel):
     )
     cost = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     payment_method = models.CharField(
-        choices=PaymentMixin.PaymentMethods.choices, default=PaymentMixin.PaymentMethods.CASH
+        max_length=1, choices=PaymentMixin.PaymentMethods.choices, default=PaymentMixin.PaymentMethods.CASH
     )
     record_date = models.DateField(null=True, blank=True)
 
