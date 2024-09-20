@@ -44,8 +44,8 @@ class Document(TimeStampModel):
     validity_period = models.IntegerField(null=True, blank=True)
     renewal_frequency = models.IntegerField(null=True, blank=True)
     issuing_authority = models.CharField(max_length=100)
-    begin_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
+    exp_begin_date = models.DateField(null=True, blank=True)
+    exp_end_date = models.DateField(null=True, blank=True)
     description = models.CharField(max_length=250, null=True, blank=True)
     document_image = models.ImageField(upload_to="media/document_types/", null=True, blank=True)
 
