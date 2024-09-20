@@ -87,3 +87,40 @@ class Partner(TimeStampModel):
 
     def __str__(self):
         return f"{self.partnership.name} - {self.companyNIF}"
+
+
+class Fuel(TimeStampModel):
+    class FuelType(models.TextChoices):
+        GASOLINE = "GASOLINE", _("Gasoline")
+        DIESEL = "DIESEL", _("Diesel")
+        ELECTRIC = "ELECTRIC", _("Electric")
+        OTHER = "OTHER", _("Other")
+
+    vehicle = models.ForeignKey("management.Vehicle", on_delete=models.PROTECT, null=True, blank=True)
+    fuel_type = models.CharField(max_length=50, choices=FuelType.choices, default=FuelType.GASOLINE)
+
+    def __str__(self):
+        return f"{self.vehicle} - {self.fuel_type}"
+
+
+class IssueReport(TimeStampModel):
+    class Priority(models.TextChoices):
+        LOW = "LOW", _("Low")
+        MEDIUM = "MEDIUM", _("Medium")
+        HIGH = "HIGH", _("High")
+
+    name = models.CharField(max_length=255, verbose_name=_("Issue Report Name"))
+    vehicle = models.ForeignKey(
+        "management.Vehicle",
+        on_delete=models.PROTECT,
+        related_name="issue_reports",
+        related_query_name="issue_report",
+        null=True,
+        blank=True,
+    )
+    priority = models.CharField(max_length=50, choices=Priority.choices, default=Priority.HIGH)
+    report_date = models.DateField(null=True, blank=True)
+    description = models.CharField(max_length=250, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.name} for {self.vehicle} - {self.get_priority_display()}"
