@@ -49,6 +49,14 @@ class Driver(models.Model):
         get_user_model(), on_delete=models.CASCADE, related_name="driver", related_query_name="drivers"
     )
     driving_license_file = models.ImageField(blank=True, null=True)
+    driver_license_document = models.OneToOneField(
+        "vehicleHub.Document",
+        on_delete=models.PROTECT,
+        related_name="owner",
+        related_query_name="owner",
+        null=True,
+        blank=True,
+    )
     driving_license_number = models.CharField(max_length=20)
     license_category = models.CharField(
         choices=LicenseCategories.choices, max_length=2, default=LicenseCategories.CATEGORY_B
