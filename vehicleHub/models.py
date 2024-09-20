@@ -53,3 +53,37 @@ class Document(TimeStampModel):
         if self.name:
             return f"{self.name} - {self.get_document_type_display()}"
         return f"{self.document_type} - {self.issued_to}"
+
+
+# class DocumentCost(TimeStampModel):
+#     document = models.ForeignKey("vehicleHub.Document", on_delete=models.PROTECT, related_name="costs", related_query_name="costs")
+#     payment_date = models.DateField(null=True, blank=True)
+#     cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
+
+class Partnership(TimeStampModel):
+    class Status(models.TextChoices):
+        ACTIVE = "ACTIVE", _("Active")
+        INACTIVE = "INACTIVE", _("Inactive")
+        TERMINATED = "TERMINATED", _("Terminated")
+
+    name = models.CharField(max_length=255, verbose_name=_("Partnership Name"))
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=50, choices=Status.choices, default=Status.ACTIVE)
+    description = models.CharField(max_length=250, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.start_date} - {self.end_date} - {self.status}"
+
+
+class Partner(TimeStampModel):
+    partnership = models.ForeignKey("vehicleHub.Partnership", on_delete=models.PROTECT, null=True, blank=True)
+    address = models.CharField(max_length=255, verbose_name=_("Partner Address"), null=True, blank=True)
+    email = models.EmailField()
+    website = models.URLField(null=True, blank=True)
+    phone_number = models.CharField(max_length=255, null=True, blank=True)
+    companyNIF = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.partnership.name} - {self.companyNIF}"
