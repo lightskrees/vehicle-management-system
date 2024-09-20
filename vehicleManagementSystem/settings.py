@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "authentication.apps.AuthenticationConfig",
     "rest_framework",
     "management",
+    "vehicleHub",
 ]
 
 MIDDLEWARE = [
