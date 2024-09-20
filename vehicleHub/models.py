@@ -55,12 +55,6 @@ class Document(TimeStampModel):
         return f"{self.document_type} - {self.issued_to}"
 
 
-# class DocumentCost(TimeStampModel):
-#     document = models.ForeignKey("vehicleHub.Document", on_delete=models.PROTECT, related_name="costs", related_query_name="costs")
-#     payment_date = models.DateField(null=True, blank=True)
-#     cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-
-
 class Partnership(TimeStampModel):
     class Status(models.TextChoices):
         ACTIVE = "ACTIVE", _("Active")
