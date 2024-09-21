@@ -250,7 +250,7 @@ class DocumentManagementViewSet(MultipleSerializerAPIMixin, ModelViewSet):
     create_serializer_class = DocumentCreateSerializer
     detail_serializer_class = DocumentListSerializer
 
-    @action(detail=False, methods=["POST"], url_path="/add-document/")
+    @action(detail=False, methods=["POST"], url_path="add-document/")
     def add_document(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -264,5 +264,9 @@ class DocumentManagementViewSet(MultipleSerializerAPIMixin, ModelViewSet):
             )
         return Response({"success": False, "response_message": serializer.errors})
 
-    def create(self, request, *args, **kwargs):
-        return self.add_document(request, *args, **kwargs)
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if not queryset:
+            return Response({"response_message": _("No documents registered yet.")})
+
+        return super().list(request, *args, **kwargs)
