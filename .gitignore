@@ -11,26 +11,26 @@ __pycache__/
 *.sqlite3
 db.sqlite3
 
-# Ignore virtual environment
+# virtual environment
 venv/
 env/
 
-# Ignore local environment configuration files
+# local environment configuration files
 .env
 
-# Ignore static files collected by Django
+# static files collected by Django
 /static/
 
-# Ignore media files
+# media files
 /media/
 
-# Ignore migrations if you don't want to include them
+# migrations if you don't want to include them
 */migrations/
 
-# Ignore IDE specific files
+# IDE specific files
 .idea/
 .vscode/
 
-# Ignore compiled code
+# compiled code
 *.so
 *.DS_Store
