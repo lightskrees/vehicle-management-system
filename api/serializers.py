@@ -143,3 +143,43 @@ class PartnerCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Partner
         fields = ["partnership", "email", "address", "website", "phone_number", "companyNIF"]
+
+
+# =======================
+# DOCUMENT SERIALIZERS
+# =======================
+
+
+class DocumentCreateSerializer(serializers.ModelSerializer):
+    issued_driver = serializers.PrimaryKeyRelatedField(queryset=Driver.objects.all(), allow_null=True, required=False)
+    issued_document = serializers.PrimaryKeyRelatedField(
+        queryset=Document.objects.all(), allow_null=True, required=False
+    )
+    issuing_authority = serializers.PrimaryKeyRelatedField(queryset=Partner.objects.all())
+
+    class Meta:
+        model = Document
+        fields = [
+            "name",
+            "document_type",
+            "document_category",
+            "issued_to",
+            "issued_vehicle",
+            "issued_driver",
+            "is_renewable",
+            "validity_period",
+            "renewal_frequency",
+            "issuing_authority",
+            "exp_begin_date",
+            "exp_end_date",
+        ]
+
+
+class DocumentListSerializer(serializers.ModelSerializer):
+    issued_driver = DriverSerializer(read_only=True)
+    issued_vehicle = VehicleSerializer(read_only=True)
+    issuing_authority = PartnerListSerializer(read_only=True)
+
+    class Meta:
+        model = Document
+        fields = "__all__"
