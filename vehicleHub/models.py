@@ -58,7 +58,7 @@ class Document(TimeStampModel):
         related_query_name="issued_document",
         verbose_name=_("Issuing Authority"),
     )
-    exp_begin_date = models.DateField(null=True, blank=True)
+    exp_begin_date = models.DateField(null=True, blank=True, default=timezone.now().date)
     exp_end_date = models.DateField(null=True, blank=True)
     description = models.CharField(max_length=250, null=True, blank=True)
     document_file = models.FileField(upload_to="media/document/", null=True, blank=True)
@@ -67,6 +67,14 @@ class Document(TimeStampModel):
         if self.name:
             return f"{self.name} - {self.get_document_type_display()}"
         return f"{self.document_type} - {self.issued_to}"
+
+    def clean(self):
+        if self.is_renewable and not self.exp_begin_date or not self.exp_end_date:
+            raise ValidationError(_("the expiration begin and end date are required for a renewable document."))
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
 
 class Partnership(TimeStampModel):
