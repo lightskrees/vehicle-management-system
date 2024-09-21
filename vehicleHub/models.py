@@ -80,12 +80,12 @@ class Partnership(TimeStampModel):
 
 
 class Partner(TimeStampModel):
-    partnership = models.ForeignKey("vehicleHub.Partnership", on_delete=models.PROTECT, null=True, blank=True)
+    partnership = models.OneToOneField("vehicleHub.Partnership", on_delete=models.PROTECT, null=True, blank=True)
     address = models.CharField(max_length=255, verbose_name=_("Partner Address"), null=True, blank=True)
-    email = models.EmailField()
-    website = models.URLField(null=True, blank=True)
+    email = models.EmailField(unique=True, verbose_name=_("Partner Email"))
+    website = models.URLField(unique=True, null=True, blank=True, verbose_name=_("Partner Website"))
     phone_number = models.CharField(max_length=255, null=True, blank=True)
-    companyNIF = models.CharField(max_length=255, null=True, blank=True)
+    companyNIF = models.CharField(unique=True, max_length=255, null=True, blank=True)
 
     def __str__(self):
         return f"{self.partnership.name} - {self.companyNIF}"
