@@ -1,16 +1,23 @@
 from django.db.utils import IntegrityError
 from django.utils.translation import gettext as _
 from rest_framework import mixins, viewsets
+from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from api.mixins import MultipleSerializerAPIMixin
 from api.serializers import (
     AddUserSerializer,
+    DocumentCreateSerializer,
+    DocumentListSerializer,
     DriverSerializer,
+    PartnerCreateSerializer,
+    PartnerListSerializer,
+    PartnershipSerializer,
     RegisterDriverSerializer,
     TokenSerializer,
     VehicleDriverAssignmentSerializer,
@@ -20,6 +27,7 @@ from api.serializers import (
 )
 from authentication.models import AppUser, Driver
 from management.models import Vehicle, VehicleDriverAssignment, VehicleTechnician
+from vehicleHub.models import Document, Partner, Partnership
 
 
 class TokenPairView(TokenObtainPairView):
@@ -168,3 +176,80 @@ class VehicleDriverAssignmentCreationView(APIView):
             return Response(
                 {"success": False, "response_message": _(f"Failed to assign the given driver because {str(e)}")}
             )
+
+
+class PartnershipManagementViewSet(MultipleSerializerAPIMixin, ModelViewSet):
+    queryset = Partnership.objects.filter(status=Partnership.Status.ACTIVE)
+    serializer_class = PartnershipSerializer
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if not queryset:
+            return Response({"response_message": _("No partnerships registered yet.")})
+
+        return super().list(request, *args, **kwargs)
+
+    @action(detail=False, methods=["POST"], url_path="add-partnership/")
+    def add_partnership(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {
+                    "success": True,
+                    "response_message": _("Partnership added successfully for the company!"),
+                }
+            )
+        return Response({"success": False, "response_message": serializer.errors})
+
+    # def create(self, request, *args, **kwargs):
+    #     return self.add_partnership(request, *args, **kwargs)
+
+
+class PartnerConfigurationViewSet(MultipleSerializerAPIMixin, ModelViewSet):
+    queryset = Partner.objects.filter(partnership__status=Partnership.Status.ACTIVE)
+    serializer_class = PartnerCreateSerializer
+    create_serializer_class = PartnerCreateSerializer
+    list_serializer_class = PartnerListSerializer
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if not queryset:
+            return Response({"response_message": _("No partners registered yet.")})
+        return super().list(request, *args, **kwargs)
+
+    @action(detail=False, methods=["POST"], url_path="add-partner/")
+    def add_partner(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {
+                    "success": True,
+                    "response_message": _("Partner added successfully for the company!"),
+                }
+            )
+        return Response({"success": False, "response_message": serializer.errors})
+
+
+class DocumentManagementViewSet(MultipleSerializerAPIMixin, ModelViewSet):
+    queryset = Document.objects.all()
+    create_serializer_class = DocumentCreateSerializer
+    detail_serializer_class = DocumentListSerializer
+
+    @action(detail=False, methods=["POST"], url_path="/add-document/")
+    def add_document(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {
+                    "success": True,
+                    "response_message": _("Document created successfully!"),
+                    "response_data": serializer.data,
+                }
+            )
+        return Response({"success": False, "response_message": serializer.errors})
+
+    def create(self, request, *args, **kwargs):
+        return self.add_document(request, *args, **kwargs)
