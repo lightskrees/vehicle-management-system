@@ -70,13 +70,21 @@ class Partnership(TimeStampModel):
         TERMINATED = "TERMINATED", _("Terminated")
 
     name = models.CharField(max_length=255, verbose_name=_("Partnership Name"), unique=True)
-    start_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
+    start_date = models.DateField(null=True, blank=True, verbose_name=_("Start Date"))
+    end_date = models.DateField(null=True, blank=True, verbose_name=_("End Date"))
     status = models.CharField(max_length=50, choices=Status.choices, default=Status.ACTIVE)
+    is_permanent_partner = models.BooleanField(default=False)
     description = models.CharField(max_length=250, null=True, blank=True)
 
     def __str__(self):
         return f"{self.name} - {self.start_date} - {self.end_date} - {self.status}"
+
+    def save(self, *args, **kwargs):
+        if not self.end_date:
+            self.is_permanent_partner = True
+        else:
+            self.is_permanent_partner = False
+        super().save(*args, **kwargs)
 
 
 class Partner(TimeStampModel):
