@@ -43,7 +43,15 @@ class Document(TimeStampModel):
     is_renewable = models.BooleanField(default=True)
     validity_period = models.IntegerField(null=True, blank=True)
     renewal_frequency = models.IntegerField(null=True, blank=True)
-    issuing_authority = models.CharField(max_length=100)
+    issuing_authority = models.ForeignKey(
+        "vehicleHub.Partner",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="issued_documents",
+        related_query_name="issued_document",
+        verbose_name=_("Issuing Authority"),
+    )
     exp_begin_date = models.DateField(null=True, blank=True)
     exp_end_date = models.DateField(null=True, blank=True)
     description = models.CharField(max_length=250, null=True, blank=True)
@@ -61,7 +69,7 @@ class Partnership(TimeStampModel):
         INACTIVE = "INACTIVE", _("Inactive")
         TERMINATED = "TERMINATED", _("Terminated")
 
-    name = models.CharField(max_length=255, verbose_name=_("Partnership Name"))
+    name = models.CharField(max_length=255, verbose_name=_("Partnership Name"), unique=True)
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=50, choices=Status.choices, default=Status.ACTIVE)
