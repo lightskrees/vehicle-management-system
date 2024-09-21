@@ -17,7 +17,8 @@ from api.serializers import (
     DriverSerializer,
     PartnerCreateSerializer,
     PartnerListSerializer,
-    PartnershipSerializer,
+    PartnershipCreateSerializer,
+    PartnershipListSerializer,
     RegisterDriverSerializer,
     TokenSerializer,
     VehicleDriverAssignmentSerializer,
@@ -180,7 +181,8 @@ class VehicleDriverAssignmentCreationView(APIView):
 
 class PartnershipManagementViewSet(MultipleSerializerAPIMixin, ModelViewSet):
     queryset = Partnership.objects.filter(status=Partnership.Status.ACTIVE)
-    serializer_class = PartnershipSerializer
+    serializer_class = PartnershipCreateSerializer
+    list_serializer_class = PartnershipListSerializer
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
