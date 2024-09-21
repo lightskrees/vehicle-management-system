@@ -92,7 +92,7 @@ class DriverViewSet(
         )
 
 
-class VehicleViewSet(mixins.CreateModelMixin, GenericViewSet):
+class VehicleViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, GenericViewSet):
     queryset = Vehicle.objects.all()
     serializer_class = VehicleSerializer
 
@@ -104,6 +104,17 @@ class VehicleViewSet(mixins.CreateModelMixin, GenericViewSet):
                 {"success": True, "response_message": _("New Vehicle registered!"), "response_data": serializer.data}
             )
         return Response({"success": False, "response_message": serializer.errors})
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if not queryset:
+            return Response(
+                {
+                    "success": False,
+                    "response_message": _("No Vehicles registered!"),
+                }
+            )
+        super().list(request, *args, **kwargs)
 
 
 class VehicleTechnicianViewSet(viewsets.ModelViewSet):
