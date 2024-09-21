@@ -13,16 +13,16 @@ class Document(TimeStampModel):
         OTHER = "OTHER", _("Other")
 
     class DocumentTypeChoices(models.TextChoices):
-        CORE = "CORE", _("Core Document")
-        TRAFFIC_VIOLATION = "TRAFFIC_VIOLATION", _("Traffic Violation")
+        CORE = "core", _("Core Document")
+        TRAFFIC_VIOLATION = "traffic_violation", _("Traffic Violation")
 
     class RenewalFrequencyPeriod(models.TextChoices):
         MONTH = "M", _("Months")
         YEAR = "Y", _("Years")
 
     class OwnerChoices(models.TextChoices):
-        VEHICLE = "VEHICLE", _("Vehicle")
-        DRIVER = "DRIVER", _("Driver")
+        VEHICLE = "V", _("Vehicle")
+        DRIVER = "D", _("Driver")
 
     name = models.CharField(max_length=255, verbose_name=_("Document Name"))
     document_type = models.CharField(max_length=50, choices=DocumentChoices.choices)
@@ -45,9 +45,8 @@ class Document(TimeStampModel):
         related_query_name="document",
     )
     is_renewable = models.BooleanField(default=True)
-    validity_period = models.IntegerField(null=True, blank=True)
-    renewal_frequency = models.IntegerField(default=1, null=True, blank=True)
-    renewal_frequency_type = models.CharField(
+    validity_period = models.IntegerField(null=True, blank=True, default=1)
+    renewal_frequency = models.CharField(
         max_length=50, choices=RenewalFrequencyPeriod.choices, default=RenewalFrequencyPeriod.YEAR
     )
     issuing_authority = models.ForeignKey(
