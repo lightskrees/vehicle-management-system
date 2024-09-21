@@ -248,7 +248,8 @@ class PartnerConfigurationViewSet(MultipleSerializerAPIMixin, ModelViewSet):
 class DocumentManagementViewSet(MultipleSerializerAPIMixin, ModelViewSet):
     queryset = Document.objects.all()
     create_serializer_class = DocumentCreateSerializer
-    detail_serializer_class = DocumentListSerializer
+    serializer_class = DocumentCreateSerializer
+    list_serializer_class = DocumentListSerializer
 
     @action(detail=False, methods=["POST"], url_path="add-document/")
     def add_document(self, request, *args, **kwargs):
