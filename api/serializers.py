@@ -160,10 +160,12 @@ class PartnerCreateSerializer(serializers.ModelSerializer):
 
 class DocumentCreateSerializer(serializers.ModelSerializer):
     issued_driver = serializers.PrimaryKeyRelatedField(queryset=Driver.objects.all(), allow_null=True, required=False)
-    issued_document = serializers.PrimaryKeyRelatedField(
-        queryset=Document.objects.all(), allow_null=True, required=False
+    issued_vehicle = serializers.PrimaryKeyRelatedField(
+        queryset=Vehicle.objects.all(), allow_null=True, required=False
     )
     issuing_authority = serializers.PrimaryKeyRelatedField(queryset=Partner.objects.all())
+    exp_begin_date = serializers.DateField(required=False)
+    exp_end_date = serializers.DateField(required=False)
 
     class Meta:
         model = Document
