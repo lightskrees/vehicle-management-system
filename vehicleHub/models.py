@@ -47,7 +47,7 @@ class Document(TimeStampModel):
     exp_begin_date = models.DateField(null=True, blank=True)
     exp_end_date = models.DateField(null=True, blank=True)
     description = models.CharField(max_length=250, null=True, blank=True)
-    document_image = models.ImageField(upload_to="media/document_types/", null=True, blank=True)
+    document_file = models.FileField(upload_to="media/document/", null=True, blank=True)
 
     def __str__(self):
         if self.name:
