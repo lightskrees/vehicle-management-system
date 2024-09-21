@@ -123,14 +123,22 @@ class VehicleDriverAssignmentSerializer(serializers.ModelSerializer):
 # =======================
 
 
-class PartnershipSerializer(serializers.ModelSerializer):
+class PartnershipCreateSerializer(serializers.ModelSerializer):
+    end_date = serializers.DateField(required=False)
+
     class Meta:
         model = Partnership
         fields = ["id", "name", "start_date", "end_date", "description"]
 
 
+class PartnershipListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Partnership
+        fields = ["id", "name", "start_date", "end_date", "description", "is_permanent_partner"]
+
+
 class PartnerListSerializer(serializers.ModelSerializer):
-    partnership = PartnershipSerializer(read_only=True)
+    partnership = PartnershipListSerializer(read_only=True)
 
     class Meta:
         model = Partner
