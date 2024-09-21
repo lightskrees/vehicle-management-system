@@ -190,4 +190,18 @@ class DocumentListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Document
-        fields = "__all__"
+        fields = [
+            "id",
+            "name",
+            "document_type",
+            "document_category",
+            "issued_to",
+            "issued_vehicle",
+            "issued_driver",
+            "is_renewable",
+            "validity_period",
+            "renewal_frequency",
+            "issuing_authority",
+            "exp_begin_date",
+            "exp_end_date",
+        ]
