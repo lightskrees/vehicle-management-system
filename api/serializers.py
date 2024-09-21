@@ -1,8 +1,10 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+from api.custom_serializer_fields import RelatedPartnership
 from authentication.models import AppUser, Driver
 from management.models import Vehicle, VehicleDriverAssignment, VehicleTechnician
+from vehicleHub.models import Document, Partner, Partnership
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -114,3 +116,30 @@ class VehicleDriverAssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = VehicleDriverAssignment
         fields = ("driver", "vehicle", "begin_at", "ends_at")
+
+
+# =======================
+# PARTNER SERIALIZERS
+# =======================
+
+
+class PartnershipSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Partnership
+        fields = ["id", "name", "start_date", "end_date", "description"]
+
+
+class PartnerListSerializer(serializers.ModelSerializer):
+    partnership = PartnershipSerializer(read_only=True)
+
+    class Meta:
+        model = Partner
+        fields = "__all__"
+
+
+class PartnerCreateSerializer(serializers.ModelSerializer):
+    partnership = RelatedPartnership(queryset=Partnership.objects.filter(status=Partnership.Status.ACTIVE))
+
+    class Meta:
+        model = Partner
+        fields = ["partnership", "email", "address", "website", "phone_number", "companyNIF"]
