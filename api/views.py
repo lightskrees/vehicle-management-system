@@ -114,7 +114,7 @@ class VehicleViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, GenericView
                     "response_message": _("No Vehicles registered!"),
                 }
             )
-        super().list(request, *args, **kwargs)
+        return super().list(request, *args, **kwargs)
 
 
 class VehicleTechnicianViewSet(viewsets.ModelViewSet):
