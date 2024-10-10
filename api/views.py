@@ -55,13 +55,7 @@ class DriverListView(ListAPIView):
     queryset = Driver.objects.all()
 
 
-class DriverViewSet(
-    mixins.RetrieveModelMixin,
-    mixins.ListModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-):
+class DriverViewSet(ModelViewSet):
     serializer_class = RegisterDriverSerializer
     detail_serializer_class = DriverSerializer
     permission_classes = [IsAuthenticated]
@@ -92,7 +86,7 @@ class DriverViewSet(
         )
 
 
-class VehicleViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, GenericViewSet):
+class VehicleViewSet(ModelViewSet):
     queryset = Vehicle.objects.all()
     serializer_class = VehicleSerializer
 
@@ -117,7 +111,7 @@ class VehicleViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, GenericView
         return super().list(request, *args, **kwargs)
 
 
-class VehicleTechnicianViewSet(viewsets.ModelViewSet):
+class VehicleTechnicianViewSet(ModelViewSet):
     queryset = VehicleTechnician.objects.all()
     serializer_class = VehicleTechnicianSerializer
 
