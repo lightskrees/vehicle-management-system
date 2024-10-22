@@ -19,6 +19,12 @@ class AddUserSerializer(serializers.ModelSerializer):
         fields = ("first_name", "last_name", "email", "password", "employeeID")
 
 
+class ListUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AppUser
+        fields = "__all__"
+
+
 class DriverSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     have_valid_license = serializers.SerializerMethodField()
