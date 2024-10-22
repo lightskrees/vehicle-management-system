@@ -15,6 +15,7 @@ from api.serializers import (
     DocumentCreateSerializer,
     DocumentListSerializer,
     DriverSerializer,
+    ListUserSerializer,
     PartnerCreateSerializer,
     PartnerListSerializer,
     PartnershipCreateSerializer,
@@ -48,6 +49,19 @@ class AddUserView(GenericAPIView):
                 {"success": True, "response_message": "User created successfully!", "response_data": serializer.data}
             )
         return Response({"success": False, "response_message": serializer.errors})
+
+
+class UserAPIViewSet(
+    MultipleSerializerAPIMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    GenericViewSet,
+):
+    queryset = AppUser.objects.all()
+    serializer_class = ListUserSerializer
+    update_serializer_class = AddUserSerializer
 
 
 class DriverListView(ListAPIView):
