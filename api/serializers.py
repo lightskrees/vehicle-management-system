@@ -10,7 +10,7 @@ from vehicleHub.models import Document, Partner, Partnership
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = AppUser
-        fields = ["email", "first_name", "last_name", "email", "is_active"]
+        fields = ["id", "email", "first_name", "last_name", "email", "is_active"]
 
 
 class AddUserSerializer(serializers.ModelSerializer):
@@ -32,6 +32,7 @@ class DriverSerializer(serializers.ModelSerializer):
     class Meta:
         model = Driver
         fields = [
+            "id",
             "user",
             "driving_license_number",
             "delivery_date",
@@ -89,6 +90,7 @@ class VehicleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vehicle
         fields = (
+            "id",
             "make",
             "model",
             "year",
@@ -106,7 +108,7 @@ class VehicleTechnicianSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = VehicleTechnician
-        fields = ("user", "managed_vehicles", "begin_date", "end_date")
+        fields = ("id", "user", "managed_vehicles", "begin_date", "end_date")
 
 
 class VehicleTechnicianListSerializer(serializers.ModelSerializer):
