@@ -60,7 +60,7 @@ class Document(TimeStampModel):
         related_query_name="issued_document",
         verbose_name=_("Issuing Authority"),
     )
-    exp_begin_date = models.DateField(null=True, blank=True, default=timezone.now().date)
+    exp_begin_date = models.DateField(null=True, blank=True)
     exp_end_date = models.DateField(null=True, blank=True)
     description = models.CharField(max_length=250, null=True, blank=True)
     document_file = models.FileField(upload_to="media/document/", null=True, blank=True)

@@ -7,11 +7,18 @@ from django.utils.translation import gettext as _
 
 class TimeStampModel(models.Model):
     created_by = models.ForeignKey("authentication.AppUser", on_delete=models.DO_NOTHING, blank=True, null=True)
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         abstract = True
+
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        if not created:
+            self.updated_at = timezone.now()
+
+        super().save(*args, **kwargs)
 
 
 class Vehicle(TimeStampModel):
