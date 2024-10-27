@@ -56,7 +56,7 @@ class VehicleDriverAssignment(TimeStampModel):
         INACTIVE = "I", _("inactive")
 
     driver = models.ForeignKey(
-        "authentication.AppUser", on_delete=models.CASCADE, related_name="assignments", related_query_name="assignment"
+        "authentication.Driver", on_delete=models.CASCADE, related_name="assignments", related_query_name="assignment"
     )
     vehicle = models.ForeignKey(
         Vehicle, on_delete=models.CASCADE, related_name="assignments", related_query_name="assignment"
