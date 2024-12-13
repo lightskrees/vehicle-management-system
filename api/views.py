@@ -76,27 +76,87 @@ class DriverViewSet(ModelViewSet):
     queryset = Driver.objects.all()
 
     def get_serializer_class(self):
-        if self.action == "retrieve" or self.action == "list":
+        if self.action in ["retrieve", "list"]:
             if hasattr(self, "detail_serializer_class"):
                 return self.detail_serializer_class
+        return self.serializer_class
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        # Validate and create the AppUser first
+        user_data = request.data.get("user")
+        user_serializer = AddUserSerializer(data=user_data)  # Use a serializer for AppUser validation
+        if user_serializer.is_valid():
+            user = user_serializer.save()  # Create the user
+        else:
+            return Response(
+                {
+                    "success": False,
+                    "response_message": _("User data is invalid."),
+                    "errors": user_serializer.errors,
+                },
+                status=400,
+            )
+
+        # Process the driver creation
+        serializer = self.get_serializer(data=request.data.get("driver_info"))
         if serializer.is_valid():
-            serializer.validated_data["created_by"] = request.user
-            serializer.save()
+            serializer.save(created_by=request.user, user=user)  # Pass the user and created_by fields
             return Response(
                 {
                     "success": True,
                     "response_message": _("Driver registered successfully!"),
                     "response_data": serializer.data,
-                }
+                },
+                status=201,
             )
         return Response(
             {
                 "success": False,
-                "response_message": serializer.errors,
-            }
+                "response_message": _("Driver registration failed."),
+                "errors": serializer.errors,
+            },
+            status=400,
+        )
+
+
+class RegisterDriverApiView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Validate and create the AppUser first
+        user_data = request.data.get("user")
+        user_serializer = AddUserSerializer(data=user_data)  # Use a serializer for AppUser validation
+        if user_serializer.is_valid():
+            user = user_serializer.save()  # Create the user
+        else:
+            return Response(
+                {
+                    "success": False,
+                    "response_message": _("User data is invalid."),
+                    "errors": user_serializer.errors,
+                },
+                status=400,
+            )
+
+        # Process the driver creation
+        serializer = RegisterDriverSerializer(data=request.data.get("driver_info"))
+        if serializer.is_valid():
+            serializer.save(created_by=request.user, user=user)  # Pass the user and created_by fields
+            return Response(
+                {
+                    "success": True,
+                    "response_message": _("Driver registered successfully!"),
+                    "response_data": serializer.data,
+                },
+                status=201,
+            )
+        return Response(
+            {
+                "success": False,
+                "response_message": _("Driver registration failed."),
+                "errors": serializer.errors,
+            },
+            status=400,
         )
 
 

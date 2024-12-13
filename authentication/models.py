@@ -20,6 +20,14 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = "email"
 
+    def __init__(self, *args, email=None, first_name=None, last_name=None,
+                 employeeID=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.email = email
+        self.first_name = first_name
+        self.last_name = last_name
+        self.employeeID = employeeID
+
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
@@ -78,7 +86,6 @@ class Driver(models.Model):
         unique_together = ["user", "driving_license_number"]
 
     def __str__(self):
-
         return f"{self.user.full_name} :: {self.driving_license_number} :: {self.license_category}"
 
     def have_valid_license(self):

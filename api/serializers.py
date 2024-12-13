@@ -16,7 +16,7 @@ class UserSerializer(serializers.ModelSerializer):
 class AddUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = AppUser
-        fields = ("first_name", "last_name", "email", "password", "employeeID")
+        fields = ("id", "first_name", "last_name", "email", "password", "employeeID")
 
 
 class ListUserSerializer(serializers.ModelSerializer):
@@ -51,14 +51,14 @@ class RegisterDriverSerializer(serializers.ModelSerializer):
         model = Driver
         fields = ["user", "driving_license_number", "delivery_date", "expiry_date", "driving_license_file"]
 
-    def validate_user(self, value):
-        try:
-            user = AppUser.objects.get(id=value.id)
-            if not user.is_active:
-                raise serializers.ValidationError("User account is disabled.")
-            return value
-        except AppUser.DoesNotExist:
-            raise serializers.ValidationError("User account not found.")
+    # def validate_user(self, value):
+    #     try:
+    #         user = AppUser.objects.get(id=value.id)
+    #         if not user.is_active:
+    #             raise serializers.ValidationError("User account is disabled.")
+    #         return value
+    #     except AppUser.DoesNotExist:
+    #         raise serializers.ValidationError("User account not found.")
 
 
 class TokenSerializer(TokenObtainPairSerializer):
