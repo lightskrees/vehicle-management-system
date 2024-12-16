@@ -1,6 +1,6 @@
 from django.db.utils import IntegrityError
 from django.utils.translation import gettext as _
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -122,12 +122,31 @@ class DriverViewSet(ModelViewSet):
 class RegisterDriverApiView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
-        # Validate and create the AppUser first
-        user_data = request.data.get("user")
-        user_serializer = AddUserSerializer(data=user_data)  # Use a serializer for AppUser validation
+    def post(self, request, *args, **kwargs):
+        # Extract user data
+        user_data = {
+            'email': request.data.get('email'),
+            'first_name': request.data.get('first_name'),
+            'last_name': request.data.get('last_name'),
+            'password': request.data.get('password'),
+            'employeeID': request.data.get('employeeID'),
+        }
+
+        # Extract driver info
+        driver_info = {
+            'driving_license_number': request.data.get('driving_license_number'),
+            'delivery_date': request.data.get('delivery_date'),
+            'expiry_date': request.data.get('expiry_date'),
+            'license_category': request.data.get('license_category'),
+        }
+
+        # Extract driving license file
+        driving_license_file = request.FILES.get('driving_license_file')
+
+        # Validate and save the user
+        user_serializer = AddUserSerializer(data=user_data)
         if user_serializer.is_valid():
-            user = user_serializer.save()  # Create the user
+            user = user_serializer.save()
         else:
             return Response(
                 {
@@ -135,29 +154,36 @@ class RegisterDriverApiView(APIView):
                     "response_message": _("User data is invalid."),
                     "errors": user_serializer.errors,
                 },
-                status=400,
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Process the driver creation
-        serializer = RegisterDriverSerializer(data=request.data.get("driver_info"))
-        if serializer.is_valid():
-            serializer.save(created_by=request.user, user=user)  # Pass the user and created_by fields
+        # Add the user to driver_info
+        driver_info['user'] = user.id
+        driver_info['driving_license_file'] = driving_license_file
+
+        # Validate and save the driver
+        driver_serializer = RegisterDriverSerializer(data=driver_info)
+        if driver_serializer.is_valid():
+            driver = driver_serializer.save(created_by=request.user)
             return Response(
                 {
                     "success": True,
                     "response_message": _("Driver registered successfully!"),
-                    "response_data": serializer.data,
+                    "response_data": driver_serializer.data,
                 },
-                status=201,
+                status=status.HTTP_201_CREATED,
             )
-        return Response(
-            {
-                "success": False,
-                "response_message": _("Driver registration failed."),
-                "errors": serializer.errors,
-            },
-            status=400,
-        )
+        else:
+            # Delete user if driver creation fails
+            user.delete()
+            return Response(
+                {
+                    "success": False,
+                    "response_message": _("Driver registration failed."),
+                    "errors": driver_serializer.errors,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class VehicleViewSet(ModelViewSet):

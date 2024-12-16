@@ -13,7 +13,7 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=100, verbose_name=_("first name"), null=True, blank=True)
     last_name = models.CharField(max_length=100, verbose_name=_("last name"), null=True, blank=True)
     is_active = models.BooleanField(default=True)
-    employeeID = models.IntegerField(unique=True, null=True, blank=True)
+    employeeID = models.CharField(unique=True, null=True, blank=True, max_length=50)
 
     objects = AppUserManager()
     inactive = DeactivatedUserManager()

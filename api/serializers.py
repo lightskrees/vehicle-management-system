@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -15,8 +16,11 @@ class UserSerializer(serializers.ModelSerializer):
 
 class AddUserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = AppUser
-        fields = ("id", "first_name", "last_name", "email", "password", "employeeID")
+        model = get_user_model()
+        fields = ['email', 'first_name', 'last_name', 'password', 'employeeID']
+
+    def create(self, validated_data):
+        return get_user_model().objects.create_user(**validated_data)
 
 
 class ListUserSerializer(serializers.ModelSerializer):
@@ -45,20 +49,19 @@ class DriverSerializer(serializers.ModelSerializer):
 
 
 class RegisterDriverSerializer(serializers.ModelSerializer):
-    # user = serializers.PrimaryKeyRelatedField(queryset=AppUser.objects.all())
-
     class Meta:
         model = Driver
-        fields = ["user", "driving_license_number", "delivery_date", "expiry_date", "driving_license_file"]
+        fields = [
+            'user',
+            'driving_license_number',
+            'delivery_date',
+            'expiry_date',
+            'license_category',
+            'driving_license_file',
+        ]
 
-    # def validate_user(self, value):
-    #     try:
-    #         user = AppUser.objects.get(id=value.id)
-    #         if not user.is_active:
-    #             raise serializers.ValidationError("User account is disabled.")
-    #         return value
-    #     except AppUser.DoesNotExist:
-    #         raise serializers.ValidationError("User account not found.")
+    def create(self, validated_data):
+        return Driver.objects.create(**validated_data)
 
 
 class TokenSerializer(TokenObtainPairSerializer):
