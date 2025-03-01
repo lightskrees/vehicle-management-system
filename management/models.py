@@ -36,6 +36,14 @@ class Vehicle(TimeStampModel):
     vin_number = models.CharField(max_length=17, unique=True)
     vehicle_image = models.ImageField(upload_to="media/vehicles/", null=True, blank=True)
     color = models.CharField(max_length=20, null=True, blank=True)
+    fuel_type = models.ForeignKey(
+        "vehicleHub.Fuel",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="vehicles",
+        related_query_name="vehicle",
+    )
     mileage = models.PositiveIntegerField(null=True, blank=True)
     license_plate_number = models.CharField(max_length=10, unique=True)
     purchase_date = models.DateField(null=True, blank=True)

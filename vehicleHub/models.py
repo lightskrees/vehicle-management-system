@@ -122,11 +122,11 @@ class Fuel(TimeStampModel):
         ELECTRIC = "ELECTRIC", _("Electric")
         OTHER = "OTHER", _("Other")
 
-    vehicle = models.ForeignKey("management.Vehicle", on_delete=models.PROTECT, null=True, blank=True)
+    # vehicle = models.ForeignKey("management.Vehicle", on_delete=models.PROTECT, null=True, blank=True)
     fuel_type = models.CharField(max_length=50, choices=FuelType.choices, default=FuelType.GASOLINE)
 
     def __str__(self):
-        return f"{self.vehicle} - {self.fuel_type}"
+        return f"{self.fuel_type}"
 
 
 class IssueReport(TimeStampModel):
