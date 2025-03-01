@@ -8,6 +8,7 @@ from management.models import TimeStampModel
 
 class Document(TimeStampModel):
     class DocumentChoices(models.TextChoices):
+        DRIVER_CERTIFICATE = "DRIVER_CERTIFICATE", _("Driver Certificate")
         INSURANCE_CERTIFICATE = "INSURANCE_CERTIFICATE", _("Insurance Certificate")
         ROAD_TAX = "ROAD_TAX", _("Road Tax")
         VEHICLE_INSPECTION_REPORT = "VEHICLE_INSPECTION_REPORT", _("Vehicle Inspection Report")
@@ -73,6 +74,12 @@ class Document(TimeStampModel):
     def clean(self):
         if self.is_renewable and not self.exp_begin_date or not self.exp_end_date:
             raise ValidationError(_("the expiration begin and end date are required for a renewable document."))
+
+        self.issued_to = (
+            self.OwnerChoices.DRIVER
+            if self.issued_driver or "" and not self.issued_vehicle or ""
+            else self.OwnerChoices.VEHICLE
+        )
 
     def save(self, *args, **kwargs):
         self.clean()
