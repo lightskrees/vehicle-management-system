@@ -79,6 +79,7 @@ class DriverViewSet(ModelViewSet):
         if self.action == "retrieve" or self.action == "list":
             if hasattr(self, "detail_serializer_class"):
                 return self.detail_serializer_class
+        return super().get_serializer_class()
 
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
@@ -271,7 +272,13 @@ class DocumentManagementViewSet(MultipleSerializerAPIMixin, ModelViewSet):
                     "response_data": serializer.data,
                 }
             )
-        return Response({"success": False, "response_message": serializer.errors})
+        return Response(
+            {
+                "success": False,
+                "response_message": _("Failed to add document. Try again later."),
+                "response_data": serializer.errors,
+            }
+        )
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
