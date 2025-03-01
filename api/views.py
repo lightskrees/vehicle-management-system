@@ -81,7 +81,7 @@ class DriverViewSet(ModelViewSet):
                 return self.detail_serializer_class
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.validated_data["created_by"] = request.user
             serializer.save()
