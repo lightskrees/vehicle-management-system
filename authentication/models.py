@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, AbstractUser, PermissionsMixin
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -20,8 +21,7 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = "email"
 
-    def __init__(self, *args, email=None, first_name=None, last_name=None,
-                 employeeID=None, **kwargs):
+    def __init__(self, *args, email=None, first_name=None, last_name=None, employeeID=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.email = email
         self.first_name = first_name
@@ -65,7 +65,7 @@ class Driver(models.Model):
         null=True,
         blank=True,
     )
-    driving_license_number = models.CharField(max_length=20)
+    driving_license_number = models.CharField(max_length=20, unique=True)
     license_category = models.CharField(
         choices=LicenseCategories.choices, max_length=2, default=LicenseCategories.CATEGORY_B
     )
@@ -92,3 +92,11 @@ class Driver(models.Model):
         if self.expiry_date > timezone.now().date() >= self.delivery_date:
             return True
         return False
+
+    def clean(self):
+        if self.delivery_date > self.expiry_date:
+            raise ValidationError(_("Delivery data must be lower than expiry date"))
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)

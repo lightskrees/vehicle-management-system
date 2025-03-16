@@ -19,14 +19,14 @@ class AddUserSerializer(serializers.ModelSerializer):
         model = get_user_model()
         fields = ["email", "first_name", "last_name", "password", "employeeID"]
 
-    def create(self, validated_data):
-        return get_user_model().objects.create_user(**validated_data)
+    # def create(self, validated_data):
+    #     return get_user_model().objects.create_user(**validated_data)
 
 
 class ListUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = AppUser
-        fields = "__all__"
+        fields = ["email", "first_name", "last_name", "password", "is_active"]
 
 
 class DriverSerializer(serializers.ModelSerializer):

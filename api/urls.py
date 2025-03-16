@@ -21,6 +21,7 @@ router = DefaultRouter(trailing_slash=False)
 router.register(r"driver", DriverViewSet, basename="driver")
 router.register(r"vehicle-technician", VehicleTechnicianViewSet, basename="vehicle-technician")
 router.register("vehicle", VehicleViewSet, basename="vehicle")
+router.register("registerDriver", RegisterDriverApiView, basename="register-user-driver")
 
 # PARTNER MANAGEMENT URLs
 router.register("manage/partnerships", PartnershipManagementViewSet, basename="partnership")
@@ -39,5 +40,5 @@ urlpatterns = [
     path("auth/", include("rest_framework.urls")),
     path("login/", TokenPairView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
-    path("registerDriver/", RegisterDriverApiView.as_view(), name="register-driver"),
+    # path("registerDriver/", RegisterDriverApiView.as_view(), name="register-driver"),
 ]

@@ -119,10 +119,11 @@ class DriverViewSet(ModelViewSet):
         )
 
 
-class RegisterDriverApiView(APIView):
+class RegisterDriverApiView(ModelViewSet):
     permission_classes = [IsAuthenticated]
+    queryset = Driver.objects.all()
 
-    def post(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         # Extract user data
         user_data = {
             "email": request.data.get("email"),
@@ -169,7 +170,7 @@ class RegisterDriverApiView(APIView):
                 {
                     "success": True,
                     "response_message": _("Driver registered successfully!"),
-                    "response_data": driver_serializer.data,
+                    "response_data": DriverSerializer(driver).data,
                 },
                 status=status.HTTP_201_CREATED,
             )
