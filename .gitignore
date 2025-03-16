@@ -28,7 +28,6 @@ env/
 /media/
 
 # migrations if you don't want to include them
-*/migrations/
 
 # IDE specific files
 .idea/
