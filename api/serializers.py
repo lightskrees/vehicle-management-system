@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
 class AddUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = ['email', 'first_name', 'last_name', 'password', 'employeeID']
+        fields = ["email", "first_name", "last_name", "password", "employeeID"]
 
     def create(self, validated_data):
         return get_user_model().objects.create_user(**validated_data)
@@ -52,12 +52,12 @@ class RegisterDriverSerializer(serializers.ModelSerializer):
     class Meta:
         model = Driver
         fields = [
-            'user',
-            'driving_license_number',
-            'delivery_date',
-            'expiry_date',
-            'license_category',
-            'driving_license_file',
+            "user",
+            "driving_license_number",
+            "delivery_date",
+            "expiry_date",
+            "license_category",
+            "driving_license_file",
         ]
 
     def create(self, validated_data):
@@ -172,7 +172,9 @@ class DocumentCreateSerializer(serializers.ModelSerializer):
     issued_vehicle = serializers.PrimaryKeyRelatedField(
         queryset=Vehicle.objects.all(), allow_null=True, required=False
     )
-    issuing_authority = serializers.PrimaryKeyRelatedField(queryset=Partner.objects.all())
+    issuing_authority = serializers.PrimaryKeyRelatedField(
+        queryset=Partner.objects.all(), allow_null=True, required=False
+    )
     exp_begin_date = serializers.DateField(required=False)
     exp_end_date = serializers.DateField(required=False)
 
@@ -182,7 +184,6 @@ class DocumentCreateSerializer(serializers.ModelSerializer):
             "name",
             "document_type",
             "document_category",
-            "issued_to",
             "issued_vehicle",
             "issued_driver",
             "is_renewable",

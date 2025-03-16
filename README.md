@@ -53,6 +53,31 @@ python manage.py makemigrations vehicleHub
 python manage.py migrate
 ```
 
+### 3. Configuration of Local Settings
+
+You need to create a `local_settings.py` file in the `vehicleManagementSystem/settings` directory and add your database configurations. This file will override the default settings with your local development configurations.
+
+Here is an example of the `local_settings.py` file:
+```python
+from .main_settings import *
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "vms_db",
+        "HOST": "localhost",
+        "USER": "your_username",
+        "PASSWORD": "your_password",
+        "PORT": "5432",
+    },
+    "secondary": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
+```
+
+We preferred to use PostGreSQL as our primary database and SQLite as our secondary database.
 
 
 ### 4. Run the Server

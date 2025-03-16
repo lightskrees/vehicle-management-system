@@ -1,6 +1,6 @@
 from django.db.utils import IntegrityError
 from django.utils.translation import gettext as _
-from rest_framework import mixins, viewsets, status
+from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -125,23 +125,23 @@ class RegisterDriverApiView(APIView):
     def post(self, request, *args, **kwargs):
         # Extract user data
         user_data = {
-            'email': request.data.get('email'),
-            'first_name': request.data.get('first_name'),
-            'last_name': request.data.get('last_name'),
-            'password': request.data.get('password'),
-            'employeeID': request.data.get('employeeID'),
+            "email": request.data.get("email"),
+            "first_name": request.data.get("first_name"),
+            "last_name": request.data.get("last_name"),
+            "password": request.data.get("password"),
+            "employeeID": request.data.get("employeeID"),
         }
 
         # Extract driver info
         driver_info = {
-            'driving_license_number': request.data.get('driving_license_number'),
-            'delivery_date': request.data.get('delivery_date'),
-            'expiry_date': request.data.get('expiry_date'),
-            'license_category': request.data.get('license_category'),
+            "driving_license_number": request.data.get("driving_license_number"),
+            "delivery_date": request.data.get("delivery_date"),
+            "expiry_date": request.data.get("expiry_date"),
+            "license_category": request.data.get("license_category"),
         }
 
         # Extract driving license file
-        driving_license_file = request.FILES.get('driving_license_file')
+        driving_license_file = request.FILES.get("driving_license_file")
 
         # Validate and save the user
         user_serializer = AddUserSerializer(data=user_data)
@@ -158,8 +158,8 @@ class RegisterDriverApiView(APIView):
             )
 
         # Add the user to driver_info
-        driver_info['user'] = user.id
-        driver_info['driving_license_file'] = driving_license_file
+        driver_info["user"] = user.id
+        driver_info["driving_license_file"] = driving_license_file
 
         # Validate and save the driver
         driver_serializer = RegisterDriverSerializer(data=driver_info)
@@ -357,7 +357,13 @@ class DocumentManagementViewSet(MultipleSerializerAPIMixin, ModelViewSet):
                     "response_data": serializer.data,
                 }
             )
-        return Response({"success": False, "response_message": serializer.errors})
+        return Response(
+            {
+                "success": False,
+                "response_message": _("Failed to add document. Try again later."),
+                "response_data": serializer.errors,
+            }
+        )
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
