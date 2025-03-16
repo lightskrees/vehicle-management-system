@@ -65,7 +65,7 @@ class Driver(models.Model):
         null=True,
         blank=True,
     )
-    driving_license_number = models.CharField(max_length=20, unique=True)
+    driving_license_number = models.CharField(max_length=20)
     license_category = models.CharField(
         choices=LicenseCategories.choices, max_length=2, default=LicenseCategories.CATEGORY_B
     )
