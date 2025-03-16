@@ -125,65 +125,74 @@ class RegisterDriverApiView(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         # Extract user data
-        user_data = {
-            "email": request.data.get("email"),
-            "first_name": request.data.get("first_name"),
-            "last_name": request.data.get("last_name"),
-            "password": request.data.get("password"),
-            "employeeID": request.data.get("employeeID"),
-        }
+        try:
+            user_data = {
+                "email": request.data.get("email"),
+                "first_name": request.data.get("first_name"),
+                "last_name": request.data.get("last_name"),
+                "password": request.data.get("password"),
+                "employeeID": request.data.get("employeeID"),
+            }
 
-        # Extract driver info
-        driver_info = {
-            "driving_license_number": request.data.get("driving_license_number"),
-            "delivery_date": request.data.get("delivery_date"),
-            "expiry_date": request.data.get("expiry_date"),
-            "license_category": request.data.get("license_category"),
-        }
+            # Extract driver info
+            driver_info = {
+                "driving_license_number": request.data.get("driving_license_number"),
+                "delivery_date": request.data.get("delivery_date"),
+                "expiry_date": request.data.get("expiry_date"),
+                "license_category": request.data.get("license_category"),
+            }
 
-        # Extract driving license file
-        driving_license_file = request.FILES.get("driving_license_file")
+            # Extract driving license file
+            driving_license_file = request.FILES.get("driving_license_file")
 
-        # Validate and save the user
-        user_serializer = AddUserSerializer(data=user_data)
-        if user_serializer.is_valid():
-            user = user_serializer.save()
-        else:
+            # Validate and save the user
+            user_serializer = AddUserSerializer(data=user_data)
+            if user_serializer.is_valid():
+                user = user_serializer.save()
+            else:
+                return Response(
+                    {
+                        "success": False,
+                        "response_message": _("User data is invalid."),
+                        "errors": user_serializer.errors,
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Add the user to driver_info
+            driver_info["user"] = user.id
+            driver_info["driving_license_file"] = driving_license_file
+
+            # Validate and save the driver
+            driver_serializer = RegisterDriverSerializer(data=driver_info)
+            if driver_serializer.is_valid():
+                driver = driver_serializer.save(created_by=request.user)
+                return Response(
+                    {
+                        "success": True,
+                        "response_message": _("Driver registered successfully!"),
+                        "response_data": DriverSerializer(driver).data,
+                    },
+                    status=status.HTTP_201_CREATED,
+                )
+            else:
+                # Delete user if driver creation fails
+                user.delete()
+                return Response(
+                    {
+                        "success": False,
+                        "response_message": _("Driver registration failed."),
+                        "errors": driver_serializer.errors,
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        except Exception as error:
             return Response(
                 {
                     "success": False,
-                    "response_message": _("User data is invalid."),
-                    "errors": user_serializer.errors,
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Add the user to driver_info
-        driver_info["user"] = user.id
-        driver_info["driving_license_file"] = driving_license_file
-
-        # Validate and save the driver
-        driver_serializer = RegisterDriverSerializer(data=driver_info)
-        if driver_serializer.is_valid():
-            driver = driver_serializer.save(created_by=request.user)
-            return Response(
-                {
-                    "success": True,
-                    "response_message": _("Driver registered successfully!"),
-                    "response_data": DriverSerializer(driver).data,
-                },
-                status=status.HTTP_201_CREATED,
-            )
-        else:
-            # Delete user if driver creation fails
-            user.delete()
-            return Response(
-                {
-                    "success": False,
-                    "response_message": _("Driver registration failed."),
-                    "errors": driver_serializer.errors,
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+                    "response_message": _("An error occurred in the process. Please contact the administrator."),
+                    "response_data": str(error),
+                }
             )
 
 
