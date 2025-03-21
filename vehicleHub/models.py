@@ -92,7 +92,14 @@ class Partnership(TimeStampModel):
         INACTIVE = "INACTIVE", _("Inactive")
         TERMINATED = "TERMINATED", _("Terminated")
 
-    name = models.CharField(max_length=255, verbose_name=_("Partnership Name"), unique=True)
+    partner = models.ForeignKey(
+        "vehicleHub.Partner",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="%(class)ss",
+        related_query_name="%(class)s",
+    )
     start_date = models.DateField(null=True, blank=True, verbose_name=_("Start Date"))
     end_date = models.DateField(null=True, blank=True, verbose_name=_("End Date"))
     status = models.CharField(max_length=50, choices=Status.choices, default=Status.ACTIVE)
@@ -111,7 +118,7 @@ class Partnership(TimeStampModel):
 
 
 class Partner(TimeStampModel):
-    partnership = models.OneToOneField("vehicleHub.Partnership", on_delete=models.PROTECT, null=True, blank=True)
+    name = models.CharField(max_length=255, verbose_name=_("Partner Name"), unique=True)
     address = models.CharField(max_length=255, verbose_name=_("Partner Address"), null=True, blank=True)
     email = models.EmailField(unique=True, verbose_name=_("Partner Email"))
     website = models.URLField(unique=True, null=True, blank=True, verbose_name=_("Partner Website"))
@@ -152,6 +159,13 @@ class IssueReport(TimeStampModel):
         blank=True,
     )
     priority = models.CharField(max_length=50, choices=Priority.choices, default=Priority.HIGH)
+    reported_by = models.ForeignKey(
+        "authentication.AppUser",
+        on_delete=models.PROTECT,
+        null=True,
+        related_name="%(class)ss",
+        related_query_name="%(class)s",
+    )
     report_date = models.DateField(null=True, blank=True)
     description = models.CharField(max_length=250, null=True, blank=True)
 

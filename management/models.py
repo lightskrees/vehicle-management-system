@@ -72,6 +72,13 @@ class VehicleDriverAssignment(TimeStampModel):
     assignment_status = models.CharField(
         choices=AssignmentStatus.choices, max_length=1, default=AssignmentStatus.ACTIVE
     )
+    assigned_by = models.ForeignKey(
+        "authentication.AppUser",
+        on_delete=models.PROTECT,
+        related_name="vehicle_assignments",
+        related_query_name="vehicle_assignment",
+        null=True,
+    )
     begin_at = models.DateField()
     ends_at = models.DateField()
 

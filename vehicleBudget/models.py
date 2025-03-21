@@ -42,7 +42,7 @@ class VehicleMaintenance(TimeStampModel, PaymentMixin):
     maintenance_end_date = models.DateField(null=True, blank=True)
     required_issue_report = models.BooleanField(default=True)
     partner = models.ForeignKey(
-        "vehicleHub.Partner",
+        "vehicleHub.Partnership",
         models.PROTECT,
         null=True,
         blank=True,
@@ -93,7 +93,7 @@ class FuelConsumption(TimeStampModel, PaymentMixin):
     fuel_cost = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("fuel cost"))
     date = models.DateField(null=True, blank=True, verbose_name=_("Fuel Consumption date"))
     partner = models.ForeignKey(
-        "vehicleHub.Partner",
+        "vehicleHub.Partnership",
         on_delete=models.PROTECT,
         related_name="fuel_consumptions",
         related_query_name="fuel_consumption",
