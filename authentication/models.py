@@ -100,3 +100,36 @@ class Driver(models.Model):
     def save(self, *args, **kwargs):
         self.clean()
         super().save(*args, **kwargs)
+
+
+class Role(models.Model):
+    class RoleGroup(models.TextChoices):
+        ADMIN = "A", _("Administrator")
+        DRIVER = "D", _("Driver")
+        TECHNICIAN = "T", _("Technician")
+        FINANCIAL = "F", _("Financial")
+
+    role_name = models.CharField(max_length=255, unique=True)
+    role_group = models.CharField(choices=RoleGroup.choices, default=RoleGroup.ADMIN, max_length=2)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.role_name
+
+
+class AccessRole(models.Model):
+    user = models.ForeignKey(
+        "authentication.AppUser",
+        on_delete=models.PROTECT,
+        related_name="access_roles",
+        related_query_name="access_role",
+    )
+    role = models.ForeignKey(
+        "authentication.Role", on_delete=models.PROTECT, related_name="roles", related_query_name="role"
+    )
+    start_date = models.DateField()
+    end_date = models.DateField()
+    previous_end_date = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.full_name} :: {self.role}"
