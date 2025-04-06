@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from api.mixins import MultipleSerializerAPIMixin
+from api.mixins import AccessMixin, MultipleSerializerAPIMixin
 from api.serializers import (
     AddUserSerializer,
     DocumentCreateSerializer,
@@ -119,7 +119,7 @@ class DriverViewSet(ModelViewSet):
         )
 
 
-class RegisterDriverApiView(ModelViewSet):
+class RegisterDriverApiView(AccessMixin, ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Driver.objects.all()
 
@@ -349,7 +349,7 @@ class PartnerConfigurationViewSet(MultipleSerializerAPIMixin, ModelViewSet):
         return Response({"success": False, "response_message": serializer.errors})
 
 
-class DocumentManagementViewSet(MultipleSerializerAPIMixin, ModelViewSet):
+class DocumentManagementViewSet(MultipleSerializerAPIMixin, AccessMixin, ModelViewSet):
     queryset = Document.objects.all()
     create_serializer_class = DocumentCreateSerializer
     serializer_class = DocumentCreateSerializer
