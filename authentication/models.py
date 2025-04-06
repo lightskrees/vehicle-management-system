@@ -21,16 +21,9 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = "email"
 
-    def __init__(self, *args, email=None, first_name=None, last_name=None, employeeID=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.email = email
-        self.first_name = first_name
-        self.last_name = last_name
-        self.employeeID = employeeID
-
     @property
     def full_name(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.last_name} {self.first_name}"
 
     @property
     def is_administrator(self):
@@ -58,7 +51,7 @@ class Driver(models.Model):
         CATEGORY_B = "B", _("Category B")
         CATEGORY_C = "C", _("Category C")
         CATEGORY_D1 = "D1", _("Category D1")
-        # PCV (Passenger-Carrying Vehicles)
+        # PCV (Passenger-Carrying nVehicles)
         CATEGORY_D2 = "D2", _("Category D2")
         CATEGORY_E = "E", _("Category E")
         CATEGORY_F = "F", _("Category F")

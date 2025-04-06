@@ -354,6 +354,8 @@ class DocumentManagementViewSet(MultipleSerializerAPIMixin, AccessMixin, ModelVi
     create_serializer_class = DocumentCreateSerializer
     serializer_class = DocumentCreateSerializer
     list_serializer_class = DocumentListSerializer
+    access_required = "trying.access"
+    permission_denied_message = "You do not have required access to add documents."
 
     @action(detail=False, methods=["POST"], url_path="add-document/")
     def add_document(self, request, *args, **kwargs):
