@@ -119,7 +119,7 @@ class DriverViewSet(ModelViewSet):
         )
 
 
-class RegisterDriverApiView(AccessMixin, ModelViewSet):
+class RegisterDriverApiView(ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Driver.objects.all()
 
@@ -150,11 +150,15 @@ class RegisterDriverApiView(AccessMixin, ModelViewSet):
             if user_serializer.is_valid():
                 user = user_serializer.save()
             else:
+                errors = []
+                for field, messages in user_serializer.errors.items():
+                    for message in messages:
+                        errors.append(f"{field}: {message}")
                 return Response(
                     {
                         "success": False,
-                        "response_message": _("User data is invalid."),
-                        "errors": user_serializer.errors,
+                        "response_message": _(f"{errors}"),
+                        "response_data": None,
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
@@ -178,10 +182,15 @@ class RegisterDriverApiView(AccessMixin, ModelViewSet):
             else:
                 # Delete user if driver creation fails
                 user.delete()
+                errors = []
+                for field, messages in driver_serializer.errors.items():
+                    for message in messages:
+                        errors.append(f"{field}: {message}")
+
                 return Response(
                     {
                         "success": False,
-                        "response_message": _("Driver registration failed."),
+                        "response_message": _(f"{errors}"),
                         "errors": driver_serializer.errors,
                     },
                     status=status.HTTP_400_BAD_REQUEST,
