@@ -26,7 +26,7 @@ class AddUserSerializer(serializers.ModelSerializer):
 class ListUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = AppUser
-        fields = ["email", "first_name", "last_name", "password", "is_active"]
+        fields = ["id", "email", "first_name", "last_name", "password", "is_active"]
 
 
 class DriverSerializer(serializers.ModelSerializer):
