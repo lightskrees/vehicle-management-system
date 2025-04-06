@@ -358,12 +358,12 @@ class PartnerConfigurationViewSet(MultipleSerializerAPIMixin, ModelViewSet):
         return Response({"success": False, "response_message": serializer.errors})
 
 
-class DocumentManagementViewSet(MultipleSerializerAPIMixin, AccessMixin, ModelViewSet):
+class DocumentManagementViewSet(MultipleSerializerAPIMixin, ModelViewSet):
     queryset = Document.objects.all()
     create_serializer_class = DocumentCreateSerializer
     serializer_class = DocumentCreateSerializer
     list_serializer_class = DocumentListSerializer
-    access_required = "trying.access"
+    # access_required = "trying.access"
     permission_denied_message = "You do not have required access to add documents."
 
     @action(detail=False, methods=["POST"], url_path="add-document/")
