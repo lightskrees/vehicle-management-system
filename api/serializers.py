@@ -30,7 +30,7 @@ class ListUserSerializer(serializers.ModelSerializer):
 
 
 class DriverSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+    user = ListUserSerializer(read_only=True)
     have_valid_license = serializers.SerializerMethodField()
 
     class Meta:
@@ -59,9 +59,6 @@ class RegisterDriverSerializer(serializers.ModelSerializer):
             "license_category",
             "driving_license_file",
         ]
-
-    def create(self, validated_data):
-        return Driver.objects.create(**validated_data)
 
 
 class TokenSerializer(TokenObtainPairSerializer):

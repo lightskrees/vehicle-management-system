@@ -84,23 +84,23 @@ class DriverViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         # Validate and create the AppUser first
         user_data = request.data.get("user")
-        user_serializer = AddUserSerializer(data=user_data)  # Use a serializer for AppUser validation
-        if user_serializer.is_valid():
-            user = user_serializer.save()  # Create the user
-        else:
-            return Response(
-                {
-                    "success": False,
-                    "response_message": _("User data is invalid."),
-                    "errors": user_serializer.errors,
-                },
-                status=400,
-            )
+        # user_serializer = AddUserSerializer(data=user_data)  # Use a serializer for AppUser validation
+        # if user_serializer.is_valid():
+        #     user = user_serializer.save()  # Create the user
+        # else:
+        #     return Response(
+        #         {
+        #             "success": False,
+        #             "response_message": _("User data is invalid."),
+        #             "errors": user_serializer.errors,
+        #         },
+        #         status=400,
+        #     )
 
         # Process the driver creation
-        serializer = self.get_serializer(data=request.data.get("driver_info"))
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(created_by=request.user, user=user)  # Pass the user and created_by fields
+            serializer.save(created_by=request.user)  # Pass the user and created_by fields
             return Response(
                 {
                     "success": True,
@@ -109,14 +109,17 @@ class DriverViewSet(ModelViewSet):
                 },
                 status=201,
             )
-        return Response(
-            {
-                "success": False,
-                "response_message": _("Driver registration failed."),
-                "errors": serializer.errors,
-            },
-            status=400,
-        )
+        else:
+            for field, messages in serializer.errors.items():
+                for message in messages:
+                    return Response(
+                        {
+                            "success": False,
+                            "response_message": _(f"{message}"),
+                            "response_data": None,
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
 
 
 class RegisterDriverApiView(ModelViewSet):
@@ -150,18 +153,16 @@ class RegisterDriverApiView(ModelViewSet):
             if user_serializer.is_valid():
                 user = user_serializer.save()
             else:
-                errors = []
                 for field, messages in user_serializer.errors.items():
                     for message in messages:
-                        errors.append(f"{field}: {message}")
-                return Response(
-                    {
-                        "success": False,
-                        "response_message": _(f"{errors}"),
-                        "response_data": None,
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+                        return Response(
+                            {
+                                "success": False,
+                                "response_message": _(f"{message}"),
+                                "response_data": None,
+                            },
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
 
             # Add the user to driver_info
             driver_info["user"] = user.id
@@ -182,19 +183,17 @@ class RegisterDriverApiView(ModelViewSet):
             else:
                 # Delete user if driver creation fails
                 user.delete()
-                errors = []
                 for field, messages in driver_serializer.errors.items():
                     for message in messages:
-                        errors.append(f"{field}: {message}")
 
-                return Response(
-                    {
-                        "success": False,
-                        "response_message": _(f"{errors}"),
-                        "errors": driver_serializer.errors,
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+                        return Response(
+                            {
+                                "success": False,
+                                "response_message": _(f"{message}"),
+                                "errors": driver_serializer.errors,
+                            },
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
         except Exception as error:
             return Response(
                 {
