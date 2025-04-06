@@ -25,7 +25,7 @@ env/
 /static/
 
 # media files
-/media/
+media/
 
 # migrations if you don't want to include them
 
