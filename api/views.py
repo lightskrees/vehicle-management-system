@@ -22,6 +22,7 @@ from api.serializers import (
     PartnershipListSerializer,
     RegisterDriverSerializer,
     TokenSerializer,
+    UpdateDriverSerializer,
     VehicleDriverAssignmentSerializer,
     VehicleSerializer,
     VehicleTechnicianListSerializer,
