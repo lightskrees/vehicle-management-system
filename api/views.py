@@ -225,7 +225,8 @@ class RegisterDriverApiView(ModelViewSet, MultipleSerializerAPIMixin):
             driver_info["driving_license_file"] = driving_license_file
 
             # Validate and save the driver
-            driver_serializer = UpdateDriverSerializer(data=driver_info)
+            driver_object = self.get_object()
+            driver_serializer = UpdateDriverSerializer(driver_object, data=driver_info, partial=True)
             if driver_serializer.is_valid():
                 driver = driver_serializer.save(created_by=request.user)
                 return Response(
