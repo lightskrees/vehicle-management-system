@@ -61,6 +61,18 @@ class RegisterDriverSerializer(serializers.ModelSerializer):
         ]
 
 
+class UpdateDriverSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Driver
+        fields = [
+            "driving_license_number",
+            "delivery_date",
+            "expiry_date",
+            "license_category",
+            "driving_license_file",
+        ]
+
+
 class TokenSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
