@@ -16,6 +16,7 @@ from api.serializers import (
     DocumentListSerializer,
     DriverSerializer,
     ListUserSerializer,
+    ListVehicleSerializer,
     PartnerCreateSerializer,
     PartnerListSerializer,
     PartnershipCreateSerializer,
@@ -197,6 +198,7 @@ class RegisterDriverApiView(ModelViewSet, MultipleSerializerAPIMixin):
                             },
                             status=status.HTTP_400_BAD_REQUEST,
                         )
+                return None
         except Exception as error:
             return Response(
                 {
@@ -250,6 +252,7 @@ class RegisterDriverApiView(ModelViewSet, MultipleSerializerAPIMixin):
                             },
                             status=status.HTTP_400_BAD_REQUEST,
                         )
+                return None
         except Exception as error:
             return Response(
                 {
@@ -260,18 +263,33 @@ class RegisterDriverApiView(ModelViewSet, MultipleSerializerAPIMixin):
             )
 
 
-class VehicleViewSet(ModelViewSet):
+class VehicleViewSet(ModelViewSet, MultipleSerializerAPIMixin):
     queryset = Vehicle.objects.all()
     serializer_class = VehicleSerializer
+    list_serializer_class = ListVehicleSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
+            data = serializer.validated_data
+            data["created_by"] = request.user
             serializer.save()
             return Response(
                 {"success": True, "response_message": _("New Vehicle registered!"), "response_data": serializer.data}
             )
-        return Response({"success": False, "response_message": serializer.errors})
+        else:
+            for field, messages in serializer.errors.items():
+                for message in messages:
+                    return Response(
+                        {
+                            "success": False,
+                            "response_message": _(f"{message}"),
+                            "response_data": None,
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+        return None
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()

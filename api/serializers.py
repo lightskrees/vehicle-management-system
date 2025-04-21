@@ -100,7 +100,7 @@ class TokenSerializer(TokenObtainPairSerializer):
 class VehicleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vehicle
-        fields = (
+        fields = [
             "make",
             "model",
             "year",
@@ -111,7 +111,15 @@ class VehicleSerializer(serializers.ModelSerializer):
             "fuel_type",
             "license_plate_number",
             "purchase_date",
-        )
+        ]
+
+
+class ListVehicleSerializer(VehicleSerializer):
+    created_by = AddUserSerializer(read_only=True)
+    fuel_type = serializers.CharField(source="fuel_type.fuel_type", read_only=True)
+
+    class Meta(VehicleSerializer.Meta):
+        fields = VehicleSerializer.Meta.fields + ["created_by"]
 
 
 class VehicleTechnicianSerializer(serializers.ModelSerializer):
