@@ -108,6 +108,7 @@ class VehicleSerializer(serializers.ModelSerializer):
             "vin_number",
             "vehicle_image",
             "color",
+            "fuel_type",
             "license_plate_number",
             "purchase_date",
         )
