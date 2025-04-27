@@ -16,6 +16,7 @@ from api.serializers import (
     DocumentListSerializer,
     DriverSerializer,
     FuelSerializer,
+    ListFuelSerializer,
     ListUserSerializer,
     ListVehicleSerializer,
     PartnerCreateSerializer,
@@ -264,8 +265,9 @@ class RegisterDriverApiView(ModelViewSet, MultipleSerializerAPIMixin):
             )
 
 
-class FuelViewSet(viewsets.ModelViewSet):
-    serializer_class = FuelSerializer
+class FuelViewSet(MultipleSerializerAPIMixin, viewsets.ModelViewSet):
+    create_serializer_class = FuelSerializer
+    list_serializer_class = ListFuelSerializer
     queryset = Fuel.objects.all()
 
 

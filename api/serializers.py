@@ -5,7 +5,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from api.custom_serializer_fields import RelatedPartnership
 from authentication.models import AppUser, Driver
 from management.models import Vehicle, VehicleDriverAssignment, VehicleTechnician
-from vehicleHub.models import Document, Partner, Partnership
+from vehicleHub.models import Document, Fuel, Partner, Partnership
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -112,6 +112,24 @@ class VehicleSerializer(serializers.ModelSerializer):
             "license_plate_number",
             "purchase_date",
         ]
+
+
+class FuelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Fuel
+        fields = ["fuel_type"]
+
+
+class ListFuelSerializer(serializers.ModelSerializer):
+    fuel_details = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Fuel
+        fields = ["fuel_details"]
+
+    def get_fuel_details(self, obj):
+        return {"value": obj.fuel_type, "title": obj.get_fuel_type_display()}
 
 
 class ListVehicleSerializer(VehicleSerializer):
