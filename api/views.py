@@ -10,13 +10,12 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from api.mixins import AccessMixin, MultipleSerializerAPIMixin
-from api.serializers import (
+from api.serializers import (  # ListFuelSerializer,
     AddUserSerializer,
     DocumentCreateSerializer,
     DocumentListSerializer,
     DriverSerializer,
     FuelSerializer,
-    ListFuelSerializer,
     ListUserSerializer,
     ListVehicleSerializer,
     PartnerCreateSerializer,
@@ -265,9 +264,8 @@ class RegisterDriverApiView(ModelViewSet, MultipleSerializerAPIMixin):
             )
 
 
-class FuelViewSet(MultipleSerializerAPIMixin, viewsets.ModelViewSet):
-    create_serializer_class = FuelSerializer
-    list_serializer_class = ListFuelSerializer
+class FuelViewSet(viewsets.ModelViewSet):
+    serializer_class = FuelSerializer
     queryset = Fuel.objects.all()
 
 

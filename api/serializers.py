@@ -115,21 +115,23 @@ class VehicleSerializer(serializers.ModelSerializer):
 
 
 class FuelSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source="fuel_type", read_only=True)
+    fuel_type = serializers.CharField(write_only=True)
 
     class Meta:
         model = Fuel
-        fields = ["fuel_type"]
+        fields = ["fuel_type", "name"]
 
 
-class ListFuelSerializer(serializers.ModelSerializer):
-    fuel_details = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Fuel
-        fields = ["fuel_details"]
-
-    def get_fuel_details(self, obj):
-        return {"value": obj.fuel_type, "title": obj.get_fuel_type_display()}
+# class ListFuelSerializer(serializers.ModelSerializer):
+#     fuel_details = serializers.SerializerMethodField()
+#
+#     class Meta:
+#         model = Fuel
+#         fields = ["fuel_details"]
+#
+#     def get_fuel_details(self, obj):
+#         return {"value": obj.fuel_type, "title": obj.get_fuel_type_display()}
 
 
 class ListVehicleSerializer(VehicleSerializer):
