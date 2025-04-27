@@ -1,6 +1,6 @@
 from django.db.utils import IntegrityError
 from django.utils.translation import gettext as _
-from rest_framework import mixins, status
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -15,6 +15,7 @@ from api.serializers import (
     DocumentCreateSerializer,
     DocumentListSerializer,
     DriverSerializer,
+    FuelSerializer,
     ListUserSerializer,
     ListVehicleSerializer,
     PartnerCreateSerializer,
@@ -31,7 +32,7 @@ from api.serializers import (
 )
 from authentication.models import AppUser, Driver
 from management.models import Vehicle, VehicleDriverAssignment, VehicleTechnician
-from vehicleHub.models import Document, Partner, Partnership
+from vehicleHub.models import Document, Fuel, Partner, Partnership
 
 
 class TokenPairView(TokenObtainPairView):
@@ -261,6 +262,11 @@ class RegisterDriverApiView(ModelViewSet, MultipleSerializerAPIMixin):
                     "response_data": str(error),
                 }
             )
+
+
+class FuelViewSet(viewsets.ModelViewSet):
+    serializer_class = FuelSerializer
+    queryset = Fuel.objects.all()
 
 
 class VehicleViewSet(ModelViewSet, MultipleSerializerAPIMixin):

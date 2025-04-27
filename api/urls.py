@@ -7,6 +7,7 @@ from api.views import (
     DocumentManagementViewSet,
     DriverListView,
     DriverViewSet,
+    FuelViewSet,
     PartnerConfigurationViewSet,
     PartnershipManagementViewSet,
     RegisterDriverApiView,
@@ -22,6 +23,7 @@ router.register(r"driver", DriverViewSet, basename="driver")
 router.register(r"vehicle-technician", VehicleTechnicianViewSet, basename="vehicle-technician")
 router.register("vehicle", VehicleViewSet, basename="vehicle")
 router.register("registerDriver", RegisterDriverApiView, basename="register-user-driver")
+router.register("fuel", FuelViewSet, basename="register-fuel")
 
 # PARTNER MANAGEMENT URLs
 router.register("manage/partnerships", PartnershipManagementViewSet, basename="partnership")
