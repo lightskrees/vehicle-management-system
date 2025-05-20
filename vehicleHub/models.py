@@ -130,7 +130,7 @@ class Fuel(TimeStampModel):
         OTHER = "OTHER", _("Other")
 
     # vehicle = models.ForeignKey("management.Vehicle", on_delete=models.PROTECT, null=True, blank=True)
-    fuel_type = models.CharField(max_length=50, choices=FuelType.choices, default=FuelType.GASOLINE)
+    fuel_type = models.CharField(max_length=50, help_text=_("fuel type taken by the vehicle."))
 
     def __str__(self):
         return f"{self.fuel_type}"
