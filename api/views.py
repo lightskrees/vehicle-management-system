@@ -30,6 +30,7 @@ from api.serializers import (  # ListFuelSerializer,
     VehicleTechnicianListSerializer,
     VehicleTechnicianSerializer,
 )
+from api.utils import send_email
 from authentication.models import AppUser, Driver
 from management.models import Vehicle, VehicleDriverAssignment, VehicleTechnician
 from vehicleHub.models import Document, Fuel, Partner, Partnership
@@ -47,7 +48,8 @@ class AddUserView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid():
-            serializer.save()
+            user = serializer.save()
+            send_email(user, activation_link="google.com")
             return Response(
                 {"success": True, "response_message": "User created successfully!", "response_data": serializer.data}
             )
