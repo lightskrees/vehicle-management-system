@@ -48,7 +48,9 @@ class AddUserView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid():
-            user = serializer.save()
+            user = serializer.save(commit=False)
+            user.set_password(serializer.validated_data["password"])
+            user.save()
             send_email(user, activation_link="google.com")
             return Response(
                 {"success": True, "response_message": "User created successfully!", "response_data": serializer.data}
