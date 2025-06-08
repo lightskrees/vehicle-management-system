@@ -1,3 +1,4 @@
+from django.contrib.auth.hashers import make_password
 from django.db.utils import IntegrityError
 from django.utils.translation import gettext as _
 from rest_framework import mixins, status, viewsets
@@ -48,10 +49,12 @@ class AddUserView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid():
+            serializer.validated_data["password"] = make_password(serializer.validated_data["password"])
             user = serializer.save()
-            user.set_password(serializer.validated_data["password"])
-            user.save()
-            send_email(user, activation_link="google.com")
+            try:
+                send_email(user, activation_link="google.com")
+            except Exception:
+                pass  # still under configuration...
             return Response(
                 {"success": True, "response_message": "User created successfully!", "response_data": serializer.data}
             )
