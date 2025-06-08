@@ -68,7 +68,8 @@ class AccessMixin:
                 if self.request.user.has_access(role_name):
                     has_access = True
                     return has_access
-            return has_access
+
+        return has_access
 
     def initial(self, request, *args, **kwargs):
         super().initial(request, *args, **kwargs)

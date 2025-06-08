@@ -38,6 +38,8 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
         return self.access_roles.filter(start_date__lte=timezone.now(), end_date__gte=timezone.now())
 
     def has_access(self, role_name):
+        if self.is_superuser:
+            return True
         access_list = self.get_access_list()
         for access in access_list:
             if role_name == access.role.role_name:
