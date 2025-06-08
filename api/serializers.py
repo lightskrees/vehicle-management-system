@@ -120,7 +120,7 @@ class FuelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Fuel
-        fields = ["fuel_type", "name"]
+        fields = ["id", "fuel_type", "name"]
 
 
 # class ListFuelSerializer(serializers.ModelSerializer):
