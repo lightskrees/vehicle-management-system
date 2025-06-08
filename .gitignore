@@ -28,6 +28,7 @@ env/
 
 # media files
 media/
+vehicleManagementSystem/media/
 
 # migrations if you don't want to include them
 
