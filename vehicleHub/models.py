@@ -123,11 +123,11 @@ class Partner(TimeStampModel):
 
 
 class Fuel(TimeStampModel):
-    class FuelType(models.TextChoices):
-        GASOLINE = "GASOLINE", _("Gasoline")
-        DIESEL = "DIESEL", _("Diesel")
-        ELECTRIC = "ELECTRIC", _("Electric")
-        OTHER = "OTHER", _("Other")
+    # class FuelType(models.TextChoices):
+    #     GASOLINE = "GASOLINE", _("Gasoline")
+    #     DIESEL = "DIESEL", _("Diesel")
+    #     ELECTRIC = "ELECTRIC", _("Electric")
+    #     OTHER = "OTHER", _("Other")
 
     # vehicle = models.ForeignKey("management.Vehicle", on_delete=models.PROTECT, null=True, blank=True)
     fuel_type = models.CharField(max_length=50, help_text=_("fuel type taken by the vehicle."))
