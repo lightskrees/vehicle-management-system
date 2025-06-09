@@ -149,11 +149,11 @@ class ListVehicleSerializer(VehicleSerializer):
                 vehicle=obj, assignment_status=VehicleDriverAssignment.AssignmentStatus.ACTIVE
             )
         except VehicleDriverAssignment.MultipleObjectsReturned:
-            assignment = VehicleTechnician.objects.filter(vehicle=obj).first()
+            assignment = VehicleDriverAssignment.objects.filter(vehicle=obj).first()
         except VehicleDriverAssignment.DoesNotExist:
             return []
 
-        return DriverSerializer(assignment).data
+        return DriverSerializer(assignment.driver).data
 
 
 class VehicleTechnicianSerializer(serializers.ModelSerializer):
