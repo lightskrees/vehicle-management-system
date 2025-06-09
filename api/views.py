@@ -146,6 +146,17 @@ class DriverViewSet(ModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
 
+    @action(detail=False, methods=["GET"], url_path="count/")
+    def drivers_config(self, request, *args, **kwargs):
+        try:
+            response_data = {
+                "success": True,
+                "count_": self.get_queryset().count(),
+            }
+            return Response(response_data)
+        except Exception:
+            return Response({"success": False, "count_": 0})
+
 
 class RegisterDriverApiView(ModelViewSet, MultipleSerializerAPIMixin):
     permission_classes = [IsAuthenticated]
