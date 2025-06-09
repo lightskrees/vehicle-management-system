@@ -105,15 +105,15 @@ class FuelConsumption(TimeStampModel, PaymentMixin):
 
 class FinancialRecord(TimeStampModel):
     document_cost = models.ForeignKey(
-        "vehicleBudget.DocumentCost", on_delete=models.PROTECT, related_name="financial_records"
+        "vehicleBudget.DocumentCost", on_delete=models.PROTECT, related_name="financial_records", null=True
     )
     vehicle_maintenance = models.ForeignKey(
-        "vehicleBudget.VehicleMaintenance", on_delete=models.PROTECT, related_name="financial_records"
+        "vehicleBudget.VehicleMaintenance", on_delete=models.PROTECT, related_name="financial_records", null=True
     )
     fuel_consumption = models.ForeignKey(
-        "vehicleBudget.FuelConsumption", on_delete=models.PROTECT, related_name="financial_records"
+        "vehicleBudget.FuelConsumption", on_delete=models.PROTECT, related_name="financial_records", null=True
     )
-    cost = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    cost = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
     payment_method = models.CharField(
         max_length=1, choices=PaymentMixin.PaymentMethods.choices, default=PaymentMixin.PaymentMethods.CASH
     )
@@ -121,10 +121,10 @@ class FinancialRecord(TimeStampModel):
 
     def __str__(self):
         if self.document_cost:
-            return f"RECORD :: {self.cost}  - {self.document_cost.document} - {self.payment_method}"
+            return f"RECORD :: {self.cost}  - {self.document_cost.document} - {self.get_payment_method_display()}"
         elif self.fuel_consumption:
-            return f"RECORD :: {self.cost} - {self.fuel_consumption} - {self.payment_method}"
+            return f"RECORD :: {self.cost} - {self.fuel_consumption} - {self.get_payment_method_display()}"
         elif self.vehicle_maintenance:
             if self.vehicle_maintenance.issue_report:
-                return f"RECORD :: {self.cost} - {self.vehicle_maintenance.issue_report} - {self.payment_method}"
-            return f"RECORD :: {self.cost} - {self.vehicle_maintenance.name} - {self.payment_method}"
+                return f"RECORD :: {self.cost} - {self.vehicle_maintenance.issue_report} - {self.get_payment_method_display()}"
+            return f"RECORD :: {self.cost} - {self.vehicle_maintenance.name} - {self.get_payment_method_display()}"
