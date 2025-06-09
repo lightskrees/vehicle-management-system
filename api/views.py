@@ -1,5 +1,6 @@
 from django.contrib.auth.hashers import make_password
 from django.db.utils import IntegrityError
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -473,6 +474,39 @@ class VehicleAssignmentsManagementViewSet(MultipleSerializerAPIMixin, viewsets.M
             return Response(response_data)
         except Exception:
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=["POST"], url_path="deactivate/")
+    def deactivate(self, request, *args, **kwargs):
+        vehicle_id = request.query_params.get("vehicle_id")
+        if not vehicle_id:
+            return Response(
+                {"success": False, "response_message": _("vehicle ID is required.")},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        assignments = VehicleDriverAssignment.objects.filter(
+            vehicle_id=vehicle_id, assignment_status=VehicleDriverAssignment.AssignmentStatus.ACTIVE
+        )
+        if not assignments.exists():
+            return Response({"success": False, "response_message": _("Assignments not found.")})
+
+        try:
+            for assignment in assignments:
+                assignment.ends_at = timezone.now().date()
+                assignment.assignment_status = VehicleDriverAssignment.AssignmentStatus.INACTIVE
+                assignment.save()
+
+            return Response(
+                {"success": True, "response_message": _("assignments deactivated!")}, status=status.HTTP_200_OK
+            )
+        except Exception as error:
+            print(error)
+            return Response(
+                {
+                    "success": False,
+                    "response_message": _("Failed to deactivate assignments. Contact the administrator."),
+                }
+            )
 
 
 class PartnershipManagementViewSet(MultipleSerializerAPIMixin, ModelViewSet):
