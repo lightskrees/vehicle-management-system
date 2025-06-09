@@ -1,3 +1,8 @@
 from django.contrib import admin
 
-# Register your models here.
+from vehicleBudget.models import *
+
+admin.site.register(VehicleMaintenance)
+admin.site.register(DocumentCost)
+admin.site.register(FuelConsumption)
+admin.site.register(FinancialRecord)
