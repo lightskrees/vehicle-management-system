@@ -391,6 +391,17 @@ class VehicleTechnicianViewSet(ModelViewSet):
             }
         )
 
+    @action(detail=False, methods=["GET"], url_path="count/")
+    def vehicle_technician_config(self, request, *args, **kwargs):
+        try:
+            response_data = {
+                "success": True,
+                "count_": self.get_queryset().count(),
+            }
+            return Response(response_data)
+        except Exception:
+            return Response({"success": False, "count_": 0})
+
 
 class VehicleDriverAssignmentCreationView(APIView):
 
