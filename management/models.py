@@ -73,7 +73,7 @@ class VehicleDriverAssignment(TimeStampModel):
         choices=AssignmentStatus.choices, max_length=1, default=AssignmentStatus.ACTIVE
     )
     begin_at = models.DateField()
-    ends_at = models.DateField()
+    ends_at = models.DateField(null=True)
 
     objects = models.Manager()
 
