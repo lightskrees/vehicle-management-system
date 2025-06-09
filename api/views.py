@@ -73,6 +73,21 @@ class UserAPIViewSet(
     serializer_class = ListUserSerializer
     update_serializer_class = AddUserSerializer
 
+    @action(detail=False, methods=["GET"], url_path="count/")
+    def users_config(self, request, *args, **kwargs):
+        active = request.query_params.get("active")
+        response_data = {
+            "success": False,
+            "users_count": 0,
+        }
+        if active == "true":
+            response_data["success"] = True
+            response_data["users_count"] = self.get_queryset().filter(is_active=True).count()
+        elif active == "false":
+            response_data["success"] = True
+            response_data["users_count"] = AppUser.inactive.all().count()
+        return Response(response_data)
+
 
 class DriverListView(ListAPIView):
     serializer_class = DriverSerializer
