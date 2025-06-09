@@ -18,6 +18,7 @@ from api.serializers import (  # ListFuelSerializer,
     DriverSerializer,
     FuelSerializer,
     ListUserSerializer,
+    ListVehicleDriverAssignmentSerializer,
     ListVehicleSerializer,
     PartnerCreateSerializer,
     PartnerListSerializer,
@@ -442,6 +443,7 @@ class VehicleDriverAssignmentCreationView(APIView):
 class VehicleAssignmentsManagementViewSet(MultipleSerializerAPIMixin, viewsets.ModelViewSet):
     queryset = VehicleDriverAssignment.objects.all()
     serializer_class = VehicleDriverAssignmentSerializer
+    list_serializer_class = ListVehicleDriverAssignmentSerializer
 
     @action(detail=False, methods=["GET"], url_path="count/")
     def assigments_config(self, request, *args, **kwargs):

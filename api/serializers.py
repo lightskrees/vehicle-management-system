@@ -163,7 +163,16 @@ class VehicleTechnicianListSerializer(serializers.ModelSerializer):
 class VehicleDriverAssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = VehicleDriverAssignment
-        fields = ("driver", "vehicle", "begin_at", "ends_at")
+        fields = ["driver", "vehicle", "begin_at", "ends_at"]
+
+
+class ListVehicleDriverAssignmentSerializer(VehicleDriverAssignmentSerializer):
+    driver = DriverSerializer(read_only=True)
+    vehicle = VehicleSerializer(read_only=True)
+    assignment_status = serializers.CharField(source="get_assignment_status_display", read_only=True)
+
+    class Meta(VehicleDriverAssignmentSerializer.Meta):
+        fields = VehicleDriverAssignmentSerializer.Meta.fields + ["assignment_status"]
 
 
 # =======================
