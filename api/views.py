@@ -446,6 +446,8 @@ class VehicleAssignmentsManagementViewSet(MultipleSerializerAPIMixin, viewsets.M
     serializer_class = VehicleDriverAssignmentSerializer
     list_serializer_class = ListVehicleDriverAssignmentSerializer
 
+    lookup_field = "vehicle_id"
+
     @action(detail=False, methods=["GET"], url_path="count/")
     def assigments_config(self, request, *args, **kwargs):
         response_data = {"success": False, "count_": 0}
@@ -475,17 +477,12 @@ class VehicleAssignmentsManagementViewSet(MultipleSerializerAPIMixin, viewsets.M
         except Exception:
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=["POST"], url_path="deactivate/")
+    @action(detail=True, methods=["POST"], url_path="deactivate/")
     def deactivate(self, request, *args, **kwargs):
-        vehicle_id = request.query_params.get("vehicle_id")
-        if not vehicle_id:
-            return Response(
-                {"success": False, "response_message": _("vehicle ID is required.")},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        vehicle = self.get_object().vehicle
 
-        assignments = VehicleDriverAssignment.objects.filter(
-            vehicle_id=vehicle_id, assignment_status=VehicleDriverAssignment.AssignmentStatus.ACTIVE
+        assignments = self.get_queryset().filter(
+            vehicle=vehicle, assignment_status=VehicleDriverAssignment.AssignmentStatus.ACTIVE
         )
         if not assignments.exists():
             return Response({"success": False, "response_message": _("Assignments not found.")})
