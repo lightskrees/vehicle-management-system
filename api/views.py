@@ -304,7 +304,7 @@ class FuelViewSet(viewsets.ModelViewSet):
     queryset = Fuel.objects.all()
 
 
-class VehicleViewSet(ModelViewSet, MultipleSerializerAPIMixin):
+class VehicleViewSet(MultipleSerializerAPIMixin, ModelViewSet):
     queryset = Vehicle.objects.all()
     serializer_class = VehicleSerializer
     list_serializer_class = ListVehicleSerializer

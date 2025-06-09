@@ -138,9 +138,22 @@ class FuelSerializer(serializers.ModelSerializer):
 class ListVehicleSerializer(VehicleSerializer):
     created_by = AddUserSerializer(read_only=True)
     fuel_type = serializers.CharField(source="fuel_type.fuel_type", read_only=True)
+    driver = serializers.SerializerMethodField(read_only=True)
 
     class Meta(VehicleSerializer.Meta):
-        fields = VehicleSerializer.Meta.fields + ["created_by"]
+        fields = VehicleSerializer.Meta.fields + ["created_by", "driver"]
+
+    def get_driver(self, obj):
+        try:
+            assignment = VehicleDriverAssignment.objects.get(
+                vehicle=obj, assignment_status=VehicleDriverAssignment.AssignmentStatus.ACTIVE
+            )
+        except VehicleDriverAssignment.MultipleObjectsReturned:
+            assignment = VehicleTechnician.objects.filter(vehicle=obj).first()
+        except VehicleDriverAssignment.DoesNotExist:
+            return []
+
+        return DriverSerializer(assignment).data
 
 
 class VehicleTechnicianSerializer(serializers.ModelSerializer):
