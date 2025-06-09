@@ -341,6 +341,17 @@ class VehicleViewSet(ModelViewSet, MultipleSerializerAPIMixin):
             )
         return super().list(request, *args, **kwargs)
 
+    @action(detail=False, methods=["GET"], url_path="count/")
+    def vehicle_config(self, request, *args, **kwargs):
+        try:
+            response_data = {
+                "success": True,
+                "count_": self.get_queryset().count(),
+            }
+            return Response(response_data)
+        except Exception:
+            return Response({"success": False, "count_": 0})
+
 
 class VehicleTechnicianViewSet(ModelViewSet):
     queryset = VehicleTechnician.objects.all()
