@@ -439,6 +439,40 @@ class VehicleDriverAssignmentCreationView(APIView):
             )
 
 
+class VehicleAssignmentsManagementViewSet(MultipleSerializerAPIMixin, viewsets.ModelViewSet):
+    queryset = VehicleDriverAssignment.objects.all()
+    serializer_class = VehicleDriverAssignmentSerializer
+
+    @action(detail=False, methods=["GET"], url_path="count/")
+    def assigments_config(self, request, *args, **kwargs):
+        response_data = {"success": False, "count_": 0}
+
+        try:
+            active = request.query_params.get("active")
+            if active == "true":
+                response_data = {
+                    "success": True,
+                    "count_": self.get_queryset()
+                    .filter(assignment_status=VehicleDriverAssignment.AssignmentStatus.ACTIVE)
+                    .count(),
+                }
+            elif active == "false":
+                response_data = {
+                    "success": True,
+                    "count_": self.get_queryset()
+                    .filter(assignment_status=VehicleDriverAssignment.AssignmentStatus.INACTIVE)
+                    .count(),
+                }
+            else:
+                response_data = {
+                    "success": True,
+                    "count_": self.get_queryset().count(),
+                }
+            return Response(response_data)
+        except Exception:
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
+
 class PartnershipManagementViewSet(MultipleSerializerAPIMixin, ModelViewSet):
     queryset = Partnership.objects.filter(status=Partnership.Status.ACTIVE)
     serializer_class = PartnershipCreateSerializer

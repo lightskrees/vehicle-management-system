@@ -13,6 +13,7 @@ from api.views import (
     RegisterDriverApiView,
     TokenPairView,
     UserAPIViewSet,
+    VehicleAssignmentsManagementViewSet,
     VehicleDriverAssignmentCreationView,
     VehicleTechnicianViewSet,
     VehicleViewSet,
@@ -32,6 +33,10 @@ router.register(r"manage/partners", PartnerConfigurationViewSet, basename="partn
 # DOCUMENT MANAGEMENT URLs
 router.register(r"manage/documents", DocumentManagementViewSet, basename="documents")
 router.register(r"manage/users", UserAPIViewSet, basename="manage-users")
+
+# DRIVER-VEHICLE ASSIGNMENTS
+router.register(r"manage/assignments", VehicleAssignmentsManagementViewSet, basename="manage-assignments")
+
 urlpatterns = [
     path("user/add-user/", AddUserView.as_view(), name="add_user"),
     path("driver/list/", DriverListView.as_view(), name="driver-list"),
