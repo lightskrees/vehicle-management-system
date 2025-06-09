@@ -385,7 +385,9 @@ class VehicleTechnicianViewSet(ModelViewSet):
             {
                 "success": True,
                 "response_message": _("Vehicles found."),
-                "response_data": VehicleTechnicianListSerializer(queryset=queryset).data,
+                "response_data": VehicleTechnicianListSerializer(
+                    queryset, many=True, context={"request": request}
+                ).data,
             }
         )
 
