@@ -487,15 +487,16 @@ class VehicleAssignmentsManagementViewSet(MultipleSerializerAPIMixin, viewsets.M
 
     @action(detail=True, methods=["POST"], url_path="deactivate/")
     def deactivate(self, request, *args, **kwargs):
-        vehicle = self.get_object().vehicle
-
-        assignments = self.get_queryset().filter(
-            vehicle=vehicle, assignment_status=VehicleDriverAssignment.AssignmentStatus.ACTIVE
-        )
-        if not assignments.exists():
-            return Response({"success": False, "response_message": _("Assignments not found.")})
 
         try:
+            vehicle_id = kwargs.get("vehicle_id")
+            vehicle = Vehicle.objects.get(id=vehicle_id)
+
+            assignments = self.get_queryset().filter(
+                vehicle=vehicle, assignment_status=VehicleDriverAssignment.AssignmentStatus.ACTIVE
+            )
+            if not assignments.exists():
+                return Response({"success": False, "response_message": _("Assignments not found.")})
             for assignment in assignments:
                 assignment.ends_at = timezone.now().date()
                 assignment.assignment_status = VehicleDriverAssignment.AssignmentStatus.INACTIVE
@@ -503,6 +504,10 @@ class VehicleAssignmentsManagementViewSet(MultipleSerializerAPIMixin, viewsets.M
 
             return Response(
                 {"success": True, "response_message": _("assignments deactivated!")}, status=status.HTTP_200_OK
+            )
+        except Vehicle.DoesNotExist:
+            return Response(
+                {"success": False, "response_message": _("Vehicle does not exist.")}, status=status.HTTP_404_NOT_FOUND
             )
         except Exception as error:
             print(error)
