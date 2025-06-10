@@ -510,7 +510,8 @@ class VehicleAssignmentsManagementViewSet(MultipleSerializerAPIMixin, viewsets.M
                 {
                     "success": False,
                     "response_message": _("Failed to deactivate assignments. Contact the administrator."),
-                }
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
