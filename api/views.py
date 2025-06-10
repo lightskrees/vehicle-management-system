@@ -422,22 +422,30 @@ class VehicleDriverAssignmentCreationView(APIView):
                         "response_data": serializer.data,
                     }
                 )
-            return Response(
-                {
-                    "success": True,
-                    "response_message": serializer.errors,
-                }
-            )
+            else:
+                for field, messages in serializer.errors.items():
+                    for message in messages:
+                        return Response(
+                            {
+                                "success": False,
+                                "response_message": _(f"{message}"),
+                                "response_data": None,
+                            },
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+                return None
         except IntegrityError:
             return Response(
                 {
                     "success": False,
                     "response_message": _("the specified vehicle is currently assigned to another person."),
-                }
+                },
+                status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
             return Response(
-                {"success": False, "response_message": _(f"Failed to assign the given driver because {str(e)}")}
+                {"success": False, "response_message": _(f"Failed to assign the given driver because {str(e)}")},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
