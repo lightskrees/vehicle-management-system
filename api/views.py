@@ -90,6 +90,27 @@ class UserAPIViewSet(
             response_data["users_count"] = AppUser.inactive.all().count()
         return Response(response_data)
 
+    @action(detail=True, methods=["POST"], url_path="update-status/")
+    def update_status(self, request, pk=None):
+        try:
+            user = self.get_object()
+            if user.is_active:
+                user.is_active = False
+                STATUS = "deactivated"
+            else:
+                user.is_active = True
+                STATUS = "activated"
+            user.save()
+            return Response(
+                {"success": True, "response_message": _(f"User {STATUS}.")},
+                status=status.HTTP_200_OK,
+            )
+        except Exception:
+            return Response(
+                {"success": False, "response_message": _("Failed to update status. Try again later.")},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
 
 class DriverListView(ListAPIView):
     serializer_class = DriverSerializer
