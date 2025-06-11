@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from api.custom_serializer_fields import RelatedPartnership
@@ -86,6 +87,12 @@ class TokenSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         token_data = super().validate(attrs)
+
+        if not self.user.is_active:
+            raise AuthenticationFailed(
+                self.error_messages["no_active_account"],
+                "no_active_account",
+            )
 
         user_details = {
             "user_id": self.user.id,
