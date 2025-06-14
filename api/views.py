@@ -1,4 +1,5 @@
 from django.contrib.auth.hashers import make_password
+from django.db.models import Q
 from django.db.utils import IntegrityError
 from django.http import JsonResponse
 from django.utils import timezone
@@ -698,10 +699,16 @@ class DocumentManagementViewSet(MultipleSerializerAPIMixin, ModelViewSet):
 
 class IssueReportViewSet(MultipleSerializerAPIMixin, ModelViewSet):
 
-    queryset = IssueReport.objects.all()
-
     serializer_class = IssueReportSerializer
     list_serializer_class = ListIssueReportSerializer
+
+    def get_queryset(self):
+        # we only display reports that have been rejected (they can be reviewed)...
+        REJECTED = VehicleMaintenance.Status.REJECTED
+        qs = IssueReport.objects.filter(is_fixed=False).filter(
+            Q(maintenance__isnull=True) | Q(maintenance__status=REJECTED)
+        )
+        return qs
 
     def create(self, request, *args, **kwargs):
 
