@@ -295,30 +295,30 @@ class IssueReportSerializer(serializers.ModelSerializer):
         model = IssueReport
         fields = ["name", "vehicle", "priority", "description"]
 
-    def validate_vehicle(self, obj):
-
-        ACTIVE = VehicleDriverAssignment.AssignmentStatus.ACTIVE
-        try:
-            request = self.context.get("request")
-            user = request.user
-
-            if user.driver:
-                vehicles = Vehicle.objects.filter(assignment__driver=user.driver, assignment__assignment_status=ACTIVE)
-                if vehicles.exists():
-                    vehicles.get(id=self.vehicle)
-                    return self.vehicle
-                raise serializers.ValidationError("You do not have access to report that vehicle")
-            elif user.technician:
-                vehicles = Vehicle.objects.filter(managing_technician=user.technician)
-                if vehicles.exists():
-                    vehicles.get(id=self.vehicle)
-                    return self.vehicle
-                raise serializers.ValidationError("You do not have access to report that vehicle")
-
-            raise serializers.ValidationError("You do not have access to report that vehicle")
-
-        except (Vehicle.DoesNotExist, Driver.DoesNotExist):
-            raise serializers.ValidationError("Could not report that vehicle. Try again later.")
+    # def validate_vehicle(self, obj):
+    #
+    #     ACTIVE = VehicleDriverAssignment.AssignmentStatus.ACTIVE
+    #     try:
+    #         request = self.context.get("request")
+    #         user = request.user
+    #
+    #         if user.driver:
+    #             vehicles = Vehicle.objects.filter(assignment__driver=user.driver, assignment__assignment_status=ACTIVE)
+    #             if vehicles.exists():
+    #                 vehicles.get(id=self.vehicle)
+    #                 return self.vehicle
+    #             raise serializers.ValidationError("You do not have access to report that vehicle")
+    #         elif user.technician:
+    #             vehicles = Vehicle.objects.filter(managing_technician=user.technician)
+    #             if vehicles.exists():
+    #                 vehicles.get(id=self.vehicle)
+    #                 return self.vehicle
+    #             raise serializers.ValidationError("You do not have access to report that vehicle")
+    #
+    #         raise serializers.ValidationError("You do not have access to report that vehicle")
+    #
+    #     except (Vehicle.DoesNotExist, Driver.DoesNotExist):
+    #         raise serializers.ValidationError("Could not report that vehicle. Try again later.")
 
 
 class ListIssueReportSerializer(IssueReportSerializer):

@@ -3,7 +3,7 @@ from django.db.utils import IntegrityError
 from django.http import JsonResponse
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from rest_framework import mixins, status, viewsets
+from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -700,6 +700,7 @@ class IssueReportViewSet(MultipleSerializerAPIMixin, ModelViewSet):
 
     serializer_class = IssueReportSerializer
     list_serializer_class = ListIssueReportSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
 
