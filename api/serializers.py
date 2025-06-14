@@ -310,7 +310,7 @@ class IssueReportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IssueReport
-        fields = ["name", "vehicle", "priority", "description"]
+        fields = ["name", "vehicle", "issue_cost", "priority", "description"]
 
     # def validate_vehicle(self, obj):
     #

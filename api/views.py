@@ -702,7 +702,6 @@ class IssueReportViewSet(MultipleSerializerAPIMixin, ModelViewSet):
 
     serializer_class = IssueReportSerializer
     list_serializer_class = ListIssueReportSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
 
@@ -726,6 +725,42 @@ class IssueReportViewSet(MultipleSerializerAPIMixin, ModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
             return None
+
+    @action(detail=True, methods=["POST"], url_path="set-cost/")
+    def set_cost(self, request, *args, **kwargs):
+        try:
+            issue_obj = self.get_object()
+            if issue_obj.is_fixed:
+                return Response(
+                    {"success": False, "response_message": _("cannot set cost for a fixed issue")},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
+            issue_cost = request.data.get("issue_cost")
+            issue_obj.set_cost(float(issue_cost))
+
+            # update the final costs in the maintenance instance
+            PENDING = VehicleMaintenance.Status.PENDING
+            pending_maintenances = issue_obj.maintenances.filter(status=PENDING, maintenance_end_date__isnull=False)
+            for pending_maintenance in pending_maintenances:
+                issue_reports = pending_maintenance.issue_reports.all()
+                total = 0
+                for report in issue_reports:
+                    total += (
+                        report.issue_cost if report.issue_cost else 0
+                    )  # to avoid value error in computing process...
+                pending_maintenance.payment_amount = total
+                pending_maintenance.save()
+
+            return Response({"success": True, "response_message": _("cost set.")}, status=status.HTTP_200_OK)
+        except (Exception, ValueError) as e:
+            return Response(
+                {
+                    "success": False,
+                    "response_message": _("Failed to set cost. Try again later."),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 ########################

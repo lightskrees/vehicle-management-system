@@ -170,3 +170,7 @@ class IssueReport(TimeStampModel):
         if not self.report_date:
             self.report_date = timezone.now().date()
         super().save(*args, **kwargs)
+
+    def set_cost(self, cost):
+        self.issue_cost = cost
+        self.save()
