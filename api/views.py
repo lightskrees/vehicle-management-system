@@ -573,6 +573,7 @@ class CustomVehicleList(APIView):
                         assignment__driver=auth_user.driver, assignment__assignment_status=ACTIVE
                     )
                     response_data["success"] = True
+                    response_data["response_message"] = _("Success")
                     response_data["response_data"] = VehicleSerializer(vehicles, many=True).data
                     return JsonResponse(response_data, status=status.HTTP_200_OK)
             except Driver.DoesNotExist:
@@ -580,6 +581,7 @@ class CustomVehicleList(APIView):
 
             if vehicle_technician:
                 response_data["success"] = True
+                response_data["response_message"] = _("Success")
                 response_data["response_data"] = VehicleSerializer(managed_vehicles, many=True).data
                 return Response(response_data, status=status.HTTP_200_OK)
 
