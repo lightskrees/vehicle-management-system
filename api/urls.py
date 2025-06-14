@@ -8,6 +8,7 @@ from api.views import (
     DriverListView,
     DriverViewSet,
     FuelViewSet,
+    IssueReportViewSet,
     PartnerConfigurationViewSet,
     PartnershipManagementViewSet,
     RegisterDriverApiView,
@@ -36,6 +37,9 @@ router.register(r"manage/users", UserAPIViewSet, basename="manage-users")
 
 # DRIVER-VEHICLE ASSIGNMENTS
 router.register(r"manage/assignments", VehicleAssignmentsManagementViewSet, basename="manage-assignments")
+
+# ISSUE REPORTS
+router.register(r"manage/issue-reports", IssueReportViewSet, basename="issue-reports")
 
 urlpatterns = [
     path("user/add-user/", AddUserView.as_view(), name="add_user"),

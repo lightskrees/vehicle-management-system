@@ -6,7 +6,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from api.custom_serializer_fields import RelatedPartnership
 from authentication.models import AppUser, Driver
 from management.models import Vehicle, VehicleDriverAssignment, VehicleTechnician
-from vehicleHub.models import Document, Fuel, Partner, Partnership
+from vehicleHub.models import Document, Fuel, IssueReport, Partner, Partnership
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -285,3 +285,25 @@ class DocumentListSerializer(serializers.ModelSerializer):
             "exp_begin_date",
             "exp_end_date",
         ]
+
+
+class IssueReportSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(allow_null=True, required=False)
+    vehicle = serializers.PrimaryKeyRelatedField(queryset=Vehicle.objects.all(), read_only=False)
+
+    class Meta:
+        model = IssueReport
+        fields = ["name", "vehicle", "priority", "description"]
+
+
+class ListIssueReportSerializer(IssueReportSerializer):
+    vehicle = VehicleSerializer(read_only=True)
+
+    class Meta(IssueReportSerializer.Meta):
+        model = IssueReport
+        fields = ["id"] + IssueReportSerializer.Meta.fields
+
+    def validate_name(self, obj):
+        if not self.name:
+            self.name = "Issue Report"
+        return self.name
