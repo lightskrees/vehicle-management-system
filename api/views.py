@@ -215,6 +215,7 @@ class RegisterDriverApiView(ModelViewSet, MultipleSerializerAPIMixin):
             # Validate and save the user
             user_serializer = AddUserSerializer(data=user_data)
             if user_serializer.is_valid():
+                user_serializer.validated_data["password"] = make_password(user_serializer.validated_data["password"])
                 user = user_serializer.save()
             else:
                 for field, messages in user_serializer.errors.items():
