@@ -158,8 +158,12 @@ class IssueReport(TimeStampModel):
     def __str__(self):
         return f"{self.name} for {self.vehicle} - {self.get_priority_display()}"
 
+    def clean(self):
+        if not self.name:
+            self.name = "Issue Report"
+
     def save(self, *args, **kwargs):
+        self.clean()
         if not self.report_date:
             self.report_date = timezone.now().date()
-            self.save()
         super().save(*args, **kwargs)
