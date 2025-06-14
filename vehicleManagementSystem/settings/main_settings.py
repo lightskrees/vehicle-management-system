@@ -63,7 +63,7 @@ MIDDLEWARE = [
 
 REST_FRAMEWORK = {
     # REST_FRAMEWORK CONFIGURATION SETTINGS,
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "authentication.authentication_conf.AuthenticationView",
     ],
