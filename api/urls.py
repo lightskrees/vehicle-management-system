@@ -17,6 +17,7 @@ from api.views import (
     UserAPIViewSet,
     VehicleAssignmentsManagementViewSet,
     VehicleDriverAssignmentCreationView,
+    VehicleMaintenanceViewSet,
     VehicleTechnicianViewSet,
     VehicleViewSet,
 )
@@ -38,6 +39,10 @@ router.register(r"manage/users", UserAPIViewSet, basename="manage-users")
 
 # DRIVER-VEHICLE ASSIGNMENTS
 router.register(r"manage/assignments", VehicleAssignmentsManagementViewSet, basename="manage-assignments")
+
+# VEHICLE MAINTENANCES
+router.register(r"manage/vehicle/maintenances", VehicleMaintenanceViewSet, basename="vehicle-maintenances")
+
 
 # ISSUE REPORTS
 router.register(r"manage/issue-reports", IssueReportViewSet, basename="issue-reports")

@@ -32,6 +32,7 @@ from api.serializers import (  # ListFuelSerializer,
     TokenSerializer,
     UpdateDriverSerializer,
     VehicleDriverAssignmentSerializer,
+    VehicleMaintenanceSerializer,
     VehicleSerializer,
     VehicleTechnicianListSerializer,
     VehicleTechnicianSerializer,
@@ -39,6 +40,7 @@ from api.serializers import (  # ListFuelSerializer,
 from api.utils import send_email
 from authentication.models import AppUser, Driver
 from management.models import Vehicle, VehicleDriverAssignment, VehicleTechnician
+from vehicleBudget.models import VehicleMaintenance
 from vehicleHub.models import Document, Fuel, IssueReport, Partner, Partnership
 
 
@@ -722,5 +724,40 @@ class IssueReportViewSet(MultipleSerializerAPIMixin, ModelViewSet):
                             "response_message": _(f"{message}"),
                         },
                         status=status.HTTP_400_BAD_REQUEST,
+                    )
+            return None
+
+
+########################
+# VEHICLE MAINTENANCE
+########################
+
+
+class VehicleMaintenanceViewSet(MultipleSerializerAPIMixin, ModelViewSet):
+
+    queryset = VehicleMaintenance.objects.all()
+    serializer_class = VehicleMaintenanceSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.validated_data["created_by"] = request.user
+            serializer.save()
+
+            return Response(
+                {
+                    "success": True,
+                    "response_message": _("Vehicle maintenance created"),
+                },
+                status=status.HTTP_201_CREATED,
+            )
+        else:
+            for field, messages in serializer.errors.items():
+                for message in messages:
+                    return Response(
+                        {
+                            "success": False,
+                            "response_message": _(f"{message}"),
+                        }
                     )
             return None

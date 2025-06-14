@@ -6,6 +6,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from api.custom_serializer_fields import RelatedPartnership
 from authentication.models import AppUser, Driver
 from management.models import Vehicle, VehicleDriverAssignment, VehicleTechnician
+from vehicleBudget.models import VehicleMaintenance
 from vehicleHub.models import Document, Fuel, IssueReport, Partner, Partnership
 
 
@@ -261,6 +262,22 @@ class DocumentCreateSerializer(serializers.ModelSerializer):
             "exp_begin_date",
             "exp_end_date",
         ]
+
+
+# ===============================
+# VEHICLE MAINTENANCE SERIALIZERS
+# ================================
+
+
+class VehicleMaintenanceSerializer(serializers.ModelSerializer):
+    issue_reports = serializers.PrimaryKeyRelatedField(
+        queryset=IssueReport.objects.filter(is_fixed=False), many=True, read_only=False
+    )
+    partner = serializers.PrimaryKeyRelatedField(queryset=Partner.objects.all(), allow_null=True, required=False)
+
+    class Meta:
+        model = VehicleMaintenance
+        fields = ["name", "issue_reports", "maintenance_begin_date", "partner"]
 
 
 class DocumentListSerializer(serializers.ModelSerializer):
