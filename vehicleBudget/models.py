@@ -26,18 +26,14 @@ class VehicleMaintenance(TimeStampModel, PaymentMixin):
         CANCELED = "C", _("canceled")
 
     name = models.CharField(max_length=100, null=True, blank=True, verbose_name=_("name"))
-    issue_report = models.ForeignKey(
+
+    issue_reports = models.ManyToManyField(
         "vehicleHub.IssueReport",
-        on_delete=models.PROTECT,
-        null=True,
         blank=True,
         related_name="maintenances",
         related_query_name="maintenance",
     )
     status = models.CharField(choices=Status.choices, default=Status.PENDING, max_length=1)
-    vehicle = models.ForeignKey(
-        "management.Vehicle", on_delete=models.PROTECT, related_name="maintenances", related_query_name="maintenance"
-    )
     maintenance_begin_date = models.DateField(null=True, blank=True)
     maintenance_end_date = models.DateField(null=True, blank=True)
     required_issue_report = models.BooleanField(default=True)
@@ -51,13 +47,16 @@ class VehicleMaintenance(TimeStampModel, PaymentMixin):
         verbose_name=_("Maintenance partnership"),
     )
 
-    class Meta:
-        unique_together = ("issue_report", "vehicle")
-
     def __str__(self):
-        if self.required_issue_report:
-            return f"Maintenance Cost for {self.issue_report} by {self.partner}"
-        return f"Maintenance Cost for {self.name} by {self.partner}"
+        return f"{self.name} - ({self.get_status_display()})"
+
+    def clean(self):
+        if self.maintenance_begin_date and self.maintenance_end_date:
+            self.status = self.Status.APPROVED
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
 
 class DocumentCost(TimeStampModel, PaymentMixin):

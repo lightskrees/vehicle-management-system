@@ -154,6 +154,9 @@ class IssueReport(TimeStampModel):
     priority = models.CharField(max_length=50, choices=Priority.choices, default=Priority.HIGH)
     report_date = models.DateField(null=True, blank=True)
     description = models.CharField(max_length=250, null=True, blank=True)
+    is_fixed = models.BooleanField(default=False)
+
+    issue_cost = models.PositiveIntegerField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.name} for {self.vehicle} - {self.get_priority_display()}"
