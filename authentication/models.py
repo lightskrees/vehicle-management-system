@@ -57,7 +57,7 @@ class Driver(models.Model):
         CATEGORY_F = "F", _("Category F")
 
     user = models.OneToOneField(
-        get_user_model(), on_delete=models.CASCADE, related_name="driver", related_query_name="drivers"
+        get_user_model(), on_delete=models.CASCADE, related_name="driver", related_query_name="drivers", null=True
     )
     driving_license_file = models.ImageField(blank=True, null=True)
     driver_license_document = models.OneToOneField(
