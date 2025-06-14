@@ -4,7 +4,7 @@ from vehicleBudget.models import DocumentCost, FinancialRecord, FuelConsumption,
 
 
 def create_clone_in_financial_records(sender, instance, created, **kwargs):
-    if not created:
+    if not created and not sender.__name__ == "VehicleMaintenance":
         return
 
     payment_details = {
@@ -17,7 +17,7 @@ def create_clone_in_financial_records(sender, instance, created, **kwargs):
         FinancialRecord.objects.create(document_cost=instance, **payment_details)
     elif sender.__name__ == "FuelConsumption":
         FinancialRecord.objects.create(fuel_consumption=instance, **payment_details)
-    elif sender.__name__ == "VehicleMaintenance":
+    elif sender.__name__ == "VehicleMaintenance" and instance.status == sender.Status.APPROVED:
         FinancialRecord.objects.create(vehicle_maintenance=instance, **payment_details)
 
 

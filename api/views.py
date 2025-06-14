@@ -755,7 +755,7 @@ class IssueReportViewSet(MultipleSerializerAPIMixin, ModelViewSet):
                 for report in issue_reports:
                     total += (
                         report.issue_cost if report.issue_cost else 0
-                    )  # to avoid value error in computing process...
+                    )  # to avoid value error in the computing process...
                 pending_maintenance.payment_amount = total
                 pending_maintenance.save()
 
@@ -784,8 +784,8 @@ class VehicleMaintenanceViewSet(MultipleSerializerAPIMixin, ModelViewSet):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.validated_data["created_by"] = request.user
-            serializer.save()
-
+            pending_maintenance = serializer.save()
+            pending_maintenance.update_maintenance_cost()
             return Response(
                 {
                     "success": True,

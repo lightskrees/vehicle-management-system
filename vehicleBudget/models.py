@@ -58,6 +58,16 @@ class VehicleMaintenance(TimeStampModel, PaymentMixin):
         self.clean()
         super().save(*args, **kwargs)
 
+    def update_maintenance_cost(self, commit=True):
+        issue_reports = self.issue_reports.all()
+        total = 0
+        for report in issue_reports:
+            total += report.issue_cost if report.issue_cost else 0  # to avoid value error in the computing process...
+        self.payment_amount = total
+
+        if commit:
+            self.save()
+
 
 class DocumentCost(TimeStampModel, PaymentMixin):
     document = models.ForeignKey(
@@ -124,6 +134,4 @@ class FinancialRecord(TimeStampModel):
         elif self.fuel_consumption:
             return f"RECORD :: {self.cost} - {self.fuel_consumption} - {self.get_payment_method_display()}"
         elif self.vehicle_maintenance:
-            if self.vehicle_maintenance.issue_report:
-                return f"RECORD :: {self.cost} - {self.vehicle_maintenance.issue_report} - {self.get_payment_method_display()}"
             return f"RECORD :: {self.cost} - {self.vehicle_maintenance.name} - {self.get_payment_method_display()}"
