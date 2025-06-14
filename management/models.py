@@ -101,13 +101,13 @@ class VehicleDriverAssignment(TimeStampModel):
 
 class VehicleTechnician(TimeStampModel):
     user = models.OneToOneField(
-        "authentication.AppUser", on_delete=models.DO_NOTHING, related_name="user", related_query_name="user"
+        "authentication.AppUser", on_delete=models.DO_NOTHING, related_name="technician", related_query_name="user"
     )
     managed_vehicles = models.ManyToManyField(
         Vehicle, related_name="technician", related_query_name="managing_technician"
     )
     begin_date = models.DateField()
-    end_date = models.DateField()
+    end_date = models.DateField(null=True)
 
     def __str__(self):
-        return f"{self.user} :: {self.begin_date} - {self.end_date}"
+        return f"{self.user} :: {self.begin_date}"
