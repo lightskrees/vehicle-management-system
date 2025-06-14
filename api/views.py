@@ -1,5 +1,6 @@
 from django.contrib.auth.hashers import make_password
 from django.db.utils import IntegrityError
+from django.http import JsonResponse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import mixins, status, viewsets
@@ -543,6 +544,57 @@ class VehicleAssignmentsManagementViewSet(MultipleSerializerAPIMixin, viewsets.M
             )
 
 
+class CustomVehicleList(APIView):
+    def get_queryset(self):
+        return Vehicle.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        auth_user = request.user
+        ACTIVE = VehicleDriverAssignment.AssignmentStatus.ACTIVE
+
+        response_data = {
+            "success": False,
+            "response_message": _("An unexpected error occurred. Please Contact the administrator."),
+            "response_data": [],
+        }
+        try:
+            vehicle_technician = VehicleTechnician.objects.get(user=auth_user)
+            managed_vehicles = Vehicle.objects.filter(
+                managing_technician=vehicle_technician, managing_technician__end_date__isnull=False
+            )
+        except VehicleTechnician.DoesNotExist:
+            vehicle_technician = None
+            managed_vehicles = None
+
+        try:
+            try:
+                if auth_user.driver:
+                    vehicles = Vehicle.objects.filter(
+                        assignment__driver=auth_user.driver, assignment__assignment_status=ACTIVE
+                    )
+                    response_data["success"] = True
+                    response_data["response_data"] = VehicleSerializer(vehicles, many=True).data
+                    return JsonResponse(response_data, status=status.HTTP_200_OK)
+            except Driver.DoesNotExist:
+                pass
+
+            if vehicle_technician:
+                response_data["success"] = True
+                response_data["response_data"] = VehicleSerializer(managed_vehicles, many=True).data
+                return Response(response_data, status=status.HTTP_200_OK)
+
+            response_data["response_message"] = _("No vehicles to display.")
+            return Response(response_data, status=status.HTTP_200_OK)
+
+        except Driver.DoesNotExist:
+            return JsonResponse(response_data, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as error:
+            print("\n\n", error)
+            response_data["success"] = False
+            return Response(response_data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class PartnershipManagementViewSet(MultipleSerializerAPIMixin, ModelViewSet):
     queryset = Partnership.objects.filter(status=Partnership.Status.ACTIVE)
     serializer_class = PartnershipCreateSerializer
@@ -648,7 +700,7 @@ class IssueReportViewSet(MultipleSerializerAPIMixin, ModelViewSet):
 
     def create(self, request, *args, **kwargs):
 
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data, context={"request": request})
         if serializer.is_valid():
             serializer.validated_data["created_by"] = request.user
             serializer.save()

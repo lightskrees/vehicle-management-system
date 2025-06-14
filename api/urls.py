@@ -4,6 +4,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from api.views import (
     AddUserView,
+    CustomVehicleList,
     DocumentManagementViewSet,
     DriverListView,
     DriverViewSet,
@@ -44,6 +45,7 @@ router.register(r"manage/issue-reports", IssueReportViewSet, basename="issue-rep
 urlpatterns = [
     path("user/add-user/", AddUserView.as_view(), name="add_user"),
     path("driver/list/", DriverListView.as_view(), name="driver-list"),
+    path("vehicles-access/", CustomVehicleList.as_view(), name="custom-vehicles-list"),
     path(
         "vehicle/driver-assignment/", VehicleDriverAssignmentCreationView.as_view(), name="vehicle-driver-assignment"
     ),
