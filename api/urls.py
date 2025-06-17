@@ -13,6 +13,7 @@ from api.views import (
     PartnerConfigurationViewSet,
     PartnershipManagementViewSet,
     RegisterDriverApiView,
+    SystemDashboardView,
     TokenPairView,
     UserAPIViewSet,
     VehicleAssignmentsManagementViewSet,
@@ -59,4 +60,8 @@ urlpatterns = [
     path("login/", TokenPairView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     # path("registerDriver/", RegisterDriverApiView.as_view(), name="register-driver"),
+    #######################
+    # DASHBOARD VIEW
+    #####################
+    path("dashboard/", SystemDashboardView.as_view(), name="system-dashboard"),
 ]

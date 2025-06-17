@@ -1,5 +1,7 @@
+from datetime import timedelta
+
 from django.contrib.auth.hashers import make_password
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.db.utils import IntegrityError
 from django.http import JsonResponse
 from django.utils import timezone
@@ -7,7 +9,7 @@ from django.utils.translation import gettext as _
 from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView, ListAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
@@ -39,7 +41,7 @@ from api.serializers import (  # ListFuelSerializer,
     VehicleTechnicianSerializer,
 )
 from api.utils import send_email
-from authentication.models import AppUser, Driver
+from authentication.models import AppUser, Driver, Role
 from management.models import Vehicle, VehicleDriverAssignment, VehicleTechnician
 from vehicleBudget.models import VehicleMaintenance
 from vehicleHub.models import Document, Fuel, IssueReport, Partner, Partnership
@@ -803,3 +805,89 @@ class VehicleMaintenanceViewSet(MultipleSerializerAPIMixin, ModelViewSet):
                         }
                     )
             return None
+
+
+class SystemDashboardView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, *args, **kwargs):
+        today = timezone.now().date()
+        thirty_days_from_now = today + timedelta(days=30)
+
+        # SYSTEM STATISTICS
+        system_stats = {
+            "total_vehicles": Vehicle.objects.count(),
+            "total_drivers": Driver.objects.count(),
+            "total_technicians": VehicleTechnician.objects.count(),
+            "active_assignments": VehicleDriverAssignment.objects.filter(
+                assignment_status=VehicleDriverAssignment.AssignmentStatus.ACTIVE
+            ).count(),
+        }
+
+        # USER STATISTICS
+        user_stats = {
+            "total_users": AppUser.objects.count(),
+            "active_users": AppUser.objects.filter(is_active=True).count(),
+            "inactive_users": AppUser.inactive.count(),
+            "admin_users": AppUser.objects.filter(is_superuser=True).count(),
+            # 'role_distribution': Role.objects.annotate(user_count=Count('role')),  #ToDo: to be implemented soon...
+            "role_count": Role.objects.count(),
+        }
+
+        # VEHICLE STATISTICS
+        vehicle_stats = {
+            "vehicle_types": Vehicle.objects.values("vehicle_type").annotate(count=Count("vehicle_type")),
+            "vehicles_needing_service": Vehicle.objects.filter(
+                last_service_date__lt=today - timedelta(days=90)
+            ).count(),
+            "unassigned_vehicles": Vehicle.objects.filter(assignment__isnull=True).count(),
+        }
+
+        # DRIVER STATISTICS
+        driver_stats = {
+            "license_categories": Driver.objects.values("license_category").annotate(count=Count("license_category")),
+            "expiring_licenses": Driver.objects.filter(expiry_date__range=[today, thirty_days_from_now]).count(),
+            "active_drivers": Driver.objects.filter(
+                assignment__assignment_status=VehicleDriverAssignment.AssignmentStatus.ACTIVE
+            )
+            .distinct()
+            .count(),
+        }
+
+        # System Health
+        system_health = {
+            "database_status": "Connected",
+            # 'redis_status': check_redis_connection(),
+            "celery_status": check_celery_status(),
+        }
+
+        return Response(
+            {
+                "system_stats": system_stats,
+                "user_stats": user_stats,
+                "vehicle_stats": vehicle_stats,
+                "driver_stats": driver_stats,
+                "system_health": system_health,
+            }
+        )
+
+
+# def check_redis_connection():
+#     try:
+#         from django_redis import get_redis_connection
+#         redis_conn = get_redis_connection("default")
+#         redis_conn.ping()
+#         return "Connected"
+#     except Exception:
+#         return "Disconnected"
+#
+def check_celery_status():
+    try:
+        from celery.app.control import Control
+
+        app = Control()
+        if app.ping():
+            return "Running"
+        return "Stopped"
+    except Exception:
+        return "Error"
