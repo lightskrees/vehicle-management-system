@@ -902,33 +902,19 @@ class VehicleHistoryViewSet(viewsets.ViewSet):
     def get_vehicle(self, pk):
         return get_object_or_404(Vehicle, pk=pk)
 
-    @action(detail=True, methods=["get"])
-    def basic_info(self, request, pk=None):
+    @action(detail=True, methods=["get"], url_path="all-info/")
+    def all_info(self, request, pk=None):
+        """
+        vehicle history information
+        """
         vehicle = self.get_vehicle(pk)
 
-        # this one works too but I preferred using the defined serializer...
+        # Basic Info
+        basic_info = ListVehicleSerializer(vehicle, context={"request": request}).data
 
-        # data = {
-        #     'id': vehicle.id,
-        #     'make': vehicle.make,
-        #     'model': vehicle.model,
-        #     'year': vehicle.year,
-        #     'vehicle_type': vehicle.get_vehicle_type_display(),
-        #     'vin_number': vehicle.vin_number,
-        #     'color': vehicle.color,
-        #     'mileage': vehicle.mileage,
-        #     'license_plate_number': vehicle.license_plate_number,
-        #     'purchase_date': vehicle.purchase_date,
-        #     'last_service_date': vehicle.last_service_date,
-        # }
-        return Response(ListVehicleSerializer(vehicle, context={"request": request}).data)
-
-    @action(detail=True, methods=["get"])
-    def driver_assignments(self, request, pk=None):
-        vehicle = self.get_vehicle(pk)
+        # Driver Assignments
         assignments = vehicle.assignments.all().order_by("-begin_at")
-
-        data = [
+        driver_assignments = [
             {
                 "driver": assignment.driver.user.full_name,
                 "status": assignment.get_assignment_status_display(),
@@ -938,14 +924,9 @@ class VehicleHistoryViewSet(viewsets.ViewSet):
             for assignment in assignments
         ]
 
-        return Response(data)
-
-    @action(detail=True, methods=["get"])
-    def maintenance_records(self, request, pk=None):
-        vehicle = self.get_vehicle(pk)
+        # Maintenance Records
         maintenances = VehicleMaintenance.objects.filter(issue_reports__vehicle=vehicle).distinct()
-
-        data = [
+        maintenance_records = [
             {
                 "name": maintenance.name,
                 "status": maintenance.get_status_display(),
@@ -958,14 +939,9 @@ class VehicleHistoryViewSet(viewsets.ViewSet):
             for maintenance in maintenances
         ]
 
-        return Response(data)
-
-    @action(detail=True, methods=["get"])
-    def fuel_consumption(self, request, pk=None):
-        vehicle = self.get_vehicle(pk)
+        # Fuel Consumption
         consumptions = vehicle.fuel_consumptions.all().order_by("-date")
-
-        data = [
+        fuel_consumption = [
             {
                 "date": consumption.date,
                 "fuel_type": consumption.fuel_type.fuel_type,
@@ -978,14 +954,9 @@ class VehicleHistoryViewSet(viewsets.ViewSet):
             for consumption in consumptions
         ]
 
-        return Response(data)
-
-    @action(detail=True, methods=["get"])
-    def documents(self, request, pk=None):
-        vehicle = self.get_vehicle(pk)
+        # Documents
         documents = vehicle.documents.all().order_by("-created_at")
-
-        data = [
+        document_records = [
             {
                 "name": document.name,
                 "type": document.get_document_type_display(),
@@ -1000,24 +971,15 @@ class VehicleHistoryViewSet(viewsets.ViewSet):
             for document in documents
         ]
 
-        return Response(data)
-
-    @action(detail=True, methods=["get"])
-    def financial_records(self, request, pk=None):
-        vehicle = self.get_vehicle(pk)
-
-        # Get all financial records related to the vehicle
+        # Financial Records
         maintenance_costs = VehicleMaintenance.objects.filter(issue_reports__vehicle=vehicle).aggregate(
             total=Sum("payment_amount")
         )
-
         fuel_costs = vehicle.fuel_consumptions.aggregate(total=Sum("fuel_cost"))
-
         document_costs = DocumentCost.objects.filter(document__issued_vehicle=vehicle).aggregate(
             total=Sum("payment_amount")
         )
-
-        data = {
+        financial_records = {
             "maintenance_total": maintenance_costs["total"] or 0,
             "fuel_total": fuel_costs["total"] or 0,
             "document_total": document_costs["total"] or 0,
@@ -1026,14 +988,9 @@ class VehicleHistoryViewSet(viewsets.ViewSet):
             + (document_costs["total"] or 0),
         }
 
-        return Response(data)
-
-    @action(detail=True, methods=["get"])
-    def technical_management(self, request, pk=None):
-        vehicle = self.get_vehicle(pk)
+        # Technicians
         technicians = vehicle.technician.all().order_by("-begin_date")
-
-        data = [
+        technical_management = [
             {
                 "technician": technician.user.full_name,
                 "begin_date": technician.begin_date,
@@ -1042,19 +999,11 @@ class VehicleHistoryViewSet(viewsets.ViewSet):
             for technician in technicians
         ]
 
-        return Response(data)
-
-    @action(detail=True, methods=["get"])
-    def issue_reports(self, request, pk=None):
-        vehicle = self.get_vehicle(pk)
+        # Issue Reports
         issue_reports = vehicle.issue_reports.all().order_by("-created_at")
-        return Response(ListIssueReportSerializer(issue_reports, many=True, context={"request": request}).data)
+        issue_report_data = ListIssueReportSerializer(issue_reports, many=True, context={"request": request}).data
 
-    @action(detail=True, methods=["get"])
-    def stats(self, request, pk=None):
-        vehicle = self.get_vehicle(pk)
-
-        # Calculate various statistics
+        # Stats
         stats = {
             "total_drivers": vehicle.assignments.count(),
             "active_drivers": vehicle.assignments.filter(
@@ -1068,4 +1017,16 @@ class VehicleHistoryViewSet(viewsets.ViewSet):
             "current_mileage": vehicle.mileage,
         }
 
-        return Response(stats)
+        overall_data = {
+            "basic_info": basic_info,
+            "driver_assignments": driver_assignments,
+            "maintenance_records": maintenance_records,
+            "fuel_consumption": fuel_consumption,
+            "documents": document_records,
+            "financial_records": financial_records,
+            "technical_management": technical_management,
+            "issue_reports": issue_report_data,
+            "stats": stats,
+        }
+
+        return Response(overall_data)
