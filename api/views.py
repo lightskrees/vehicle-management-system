@@ -1,9 +1,10 @@
 from datetime import timedelta
 
 from django.contrib.auth.hashers import make_password
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
 from django.db.utils import IntegrityError
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import mixins, permissions, status, viewsets
@@ -43,7 +44,7 @@ from api.serializers import (  # ListFuelSerializer,
 from api.utils import send_email
 from authentication.models import AppUser, Driver, Role
 from management.models import Vehicle, VehicleDriverAssignment, VehicleTechnician
-from vehicleBudget.models import VehicleMaintenance
+from vehicleBudget.models import DocumentCost, VehicleMaintenance
 from vehicleHub.models import Document, Fuel, IssueReport, Partner, Partnership
 
 
@@ -891,3 +892,180 @@ def check_celery_status():
         return "Stopped"
     except Exception:
         return "Error"
+
+
+class VehicleHistoryViewSet(viewsets.ViewSet):
+    """
+    ViewSet for handling vehicle history with different aspects
+    """
+
+    def get_vehicle(self, pk):
+        return get_object_or_404(Vehicle, pk=pk)
+
+    @action(detail=True, methods=["get"])
+    def basic_info(self, request, pk=None):
+        vehicle = self.get_vehicle(pk)
+
+        # this one works too but I preferred using the defined serializer...
+
+        # data = {
+        #     'id': vehicle.id,
+        #     'make': vehicle.make,
+        #     'model': vehicle.model,
+        #     'year': vehicle.year,
+        #     'vehicle_type': vehicle.get_vehicle_type_display(),
+        #     'vin_number': vehicle.vin_number,
+        #     'color': vehicle.color,
+        #     'mileage': vehicle.mileage,
+        #     'license_plate_number': vehicle.license_plate_number,
+        #     'purchase_date': vehicle.purchase_date,
+        #     'last_service_date': vehicle.last_service_date,
+        # }
+        return Response(ListVehicleSerializer(vehicle, context={"request": request}).data)
+
+    @action(detail=True, methods=["get"])
+    def driver_assignments(self, request, pk=None):
+        vehicle = self.get_vehicle(pk)
+        assignments = vehicle.assignments.all().order_by("-begin_at")
+
+        data = [
+            {
+                "driver": assignment.driver.user.full_name,
+                "status": assignment.get_assignment_status_display(),
+                "begin_at": assignment.begin_at,
+                "ends_at": assignment.ends_at,
+            }
+            for assignment in assignments
+        ]
+
+        return Response(data)
+
+    @action(detail=True, methods=["get"])
+    def maintenance_records(self, request, pk=None):
+        vehicle = self.get_vehicle(pk)
+        maintenances = VehicleMaintenance.objects.filter(issue_reports__vehicle=vehicle).distinct()
+
+        data = [
+            {
+                "name": maintenance.name,
+                "status": maintenance.get_status_display(),
+                "begin_date": maintenance.maintenance_begin_date,
+                "end_date": maintenance.maintenance_end_date,
+                "payment_amount": maintenance.payment_amount,
+                "payment_method": maintenance.get_payment_method_display(),
+                "partner": maintenance.partner.partnership.name if maintenance.partner else None,
+            }
+            for maintenance in maintenances
+        ]
+
+        return Response(data)
+
+    @action(detail=True, methods=["get"])
+    def fuel_consumption(self, request, pk=None):
+        vehicle = self.get_vehicle(pk)
+        consumptions = vehicle.fuel_consumptions.all().order_by("-date")
+
+        data = [
+            {
+                "date": consumption.date,
+                "fuel_type": consumption.fuel_type.fuel_type,
+                "quantity": str(consumption.quantity),
+                "quantity_type": consumption.get_quantity_type_display(),
+                "fuel_cost": consumption.fuel_cost,
+                "payment_method": consumption.get_payment_method_display(),
+                "partner": consumption.partner.partnership.name,
+            }
+            for consumption in consumptions
+        ]
+
+        return Response(data)
+
+    @action(detail=True, methods=["get"])
+    def documents(self, request, pk=None):
+        vehicle = self.get_vehicle(pk)
+        documents = vehicle.documents.all().order_by("-created_at")
+
+        data = [
+            {
+                "name": document.name,
+                "type": document.get_document_type_display(),
+                "category": document.get_document_category_display(),
+                "is_renewable": document.is_renewable,
+                "begin_date": document.exp_begin_date,
+                "end_date": document.exp_end_date,
+                "issuing_authority": (
+                    document.issuing_authority.partnership.name if document.issuing_authority else None
+                ),
+            }
+            for document in documents
+        ]
+
+        return Response(data)
+
+    @action(detail=True, methods=["get"])
+    def financial_records(self, request, pk=None):
+        vehicle = self.get_vehicle(pk)
+
+        # Get all financial records related to the vehicle
+        maintenance_costs = VehicleMaintenance.objects.filter(issue_reports__vehicle=vehicle).aggregate(
+            total=Sum("payment_amount")
+        )
+
+        fuel_costs = vehicle.fuel_consumptions.aggregate(total=Sum("fuel_cost"))
+
+        document_costs = DocumentCost.objects.filter(document__issued_vehicle=vehicle).aggregate(
+            total=Sum("payment_amount")
+        )
+
+        data = {
+            "maintenance_total": maintenance_costs["total"] or 0,
+            "fuel_total": fuel_costs["total"] or 0,
+            "document_total": document_costs["total"] or 0,
+            "total_cost": (maintenance_costs["total"] or 0)
+            + (fuel_costs["total"] or 0)
+            + (document_costs["total"] or 0),
+        }
+
+        return Response(data)
+
+    @action(detail=True, methods=["get"])
+    def technical_management(self, request, pk=None):
+        vehicle = self.get_vehicle(pk)
+        technicians = vehicle.technician.all().order_by("-begin_date")
+
+        data = [
+            {
+                "technician": technician.user.full_name,
+                "begin_date": technician.begin_date,
+                "end_date": technician.end_date,
+            }
+            for technician in technicians
+        ]
+
+        return Response(data)
+
+    @action(detail=True, methods=["get"])
+    def issue_reports(self, request, pk=None):
+        vehicle = self.get_vehicle(pk)
+        issue_reports = vehicle.issue_reports.all().order_by("-created_at")
+        return Response(ListIssueReportSerializer(issue_reports, many=True, context={"request": request}).data)
+
+    @action(detail=True, methods=["get"])
+    def stats(self, request, pk=None):
+        vehicle = self.get_vehicle(pk)
+
+        # Calculate various statistics
+        stats = {
+            "total_drivers": vehicle.assignments.count(),
+            "active_drivers": vehicle.assignments.filter(
+                assignment_status=VehicleDriverAssignment.AssignmentStatus.ACTIVE
+            ).count(),
+            "reported_issues": vehicle.issue_reports.count(),
+            "total_maintenances": VehicleMaintenance.objects.filter(issue_reports__vehicle=vehicle).distinct().count(),
+            "total_fuel_records": vehicle.fuel_consumptions.count(),
+            "total_documents": vehicle.documents.count(),
+            "last_maintenance_date": vehicle.last_service_date,
+            "current_mileage": vehicle.mileage,
+        }
+
+        return Response(stats)

@@ -18,6 +18,7 @@ from api.views import (
     UserAPIViewSet,
     VehicleAssignmentsManagementViewSet,
     VehicleDriverAssignmentCreationView,
+    VehicleHistoryViewSet,
     VehicleMaintenanceViewSet,
     VehicleTechnicianViewSet,
     VehicleViewSet,
@@ -44,9 +45,11 @@ router.register(r"manage/assignments", VehicleAssignmentsManagementViewSet, base
 # VEHICLE MAINTENANCES
 router.register(r"manage/vehicle/maintenances", VehicleMaintenanceViewSet, basename="vehicle-maintenances")
 
-
 # ISSUE REPORTS
 router.register(r"manage/issue-reports", IssueReportViewSet, basename="issue-reports")
+
+# VEHICLE HISTORY
+router.register(r"vehicle-history", VehicleHistoryViewSet, basename="vehicle-history")
 
 urlpatterns = [
     path("user/add-user/", AddUserView.as_view(), name="add_user"),
