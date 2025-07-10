@@ -42,7 +42,7 @@ from api.serializers import (  # ListFuelSerializer,
     VehicleTechnicianSerializer,
 )
 from api.utils import send_email
-from authentication.models import AppUser, Driver, Role
+from authentication.models import AccessRole, AppUser, Driver, Role
 from management.models import Vehicle, VehicleDriverAssignment, VehicleTechnician
 from vehicleBudget.models import DocumentCost, VehicleMaintenance
 from vehicleHub.models import Document, Fuel, IssueReport, Partner, Partnership
@@ -243,6 +243,18 @@ class RegisterDriverApiView(ModelViewSet, MultipleSerializerAPIMixin):
             driver_serializer = RegisterDriverSerializer(data=driver_info)
             if driver_serializer.is_valid():
                 driver = driver_serializer.save(created_by=request.user)
+
+                # create role for the driver
+                driver_role = Role.objects.get_or_create(
+                    role_group=Role.RoleGroup.DRIVER, role_name="Driver", is_active=True
+                )[0]
+                AccessRole.objects.get_or_create(
+                    user=user,
+                    role=driver_role,
+                    start_date=timezone.now().date(),
+                    end_date=timezone.now().date() + timedelta(days=30),
+                )
+
                 return Response(
                     {
                         "success": True,
