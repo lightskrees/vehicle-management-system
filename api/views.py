@@ -910,7 +910,21 @@ class VehicleHistoryViewSet(viewsets.ViewSet):
         vehicle = self.get_vehicle(pk)
 
         # Basic Info
-        basic_info = ListVehicleSerializer(vehicle, context={"request": request}).data
+        # basic_info = ListVehicleSerializer(vehicle, context={"request": request}).data
+
+        basic_info = {
+            "id": vehicle.id,
+            "make": vehicle.make,
+            "model": vehicle.model,
+            "year": vehicle.year,
+            "vehicle_type": vehicle.get_vehicle_type_display(),
+            "vin_number": vehicle.vin_number,
+            "color": vehicle.color,
+            "mileage": vehicle.mileage,
+            "license_plate_number": vehicle.license_plate_number,
+            "purchase_date": vehicle.purchase_date,
+            "last_service_date": vehicle.last_service_date,
+        }
 
         # Driver Assignments
         assignments = vehicle.assignments.all().order_by("-begin_at")
