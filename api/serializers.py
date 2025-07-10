@@ -89,7 +89,9 @@ class TokenSerializer(TokenObtainPairSerializer):
         token_data["first_name"] = user.first_name
         token_data["last_name"] = user.last_name
         token_data["username"] = user.email
-
+        access_role = user.access_roles.first()
+        if access_role:
+            token_data["role"] = access_role.role.role_name
         return token_data
 
     def validate(self, attrs):
