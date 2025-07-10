@@ -76,6 +76,11 @@ class UpdateDriverSerializer(serializers.ModelSerializer):
 
 
 class TokenSerializer(TokenObtainPairSerializer):
+
+    default_error_messages = {
+        "no_active_account": _("Votre compte est inactif. Veuillez contacter l' administrateur.")
+    }
+
     @classmethod
     def get_token(cls, user):
         token_data = super().get_token(user)
