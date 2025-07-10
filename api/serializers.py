@@ -108,7 +108,7 @@ class TokenSerializer(TokenObtainPairSerializer):
             "username": self.user.email,
             "first_name": self.user.first_name,
             "last_name": self.user.last_name,
-            "role": self.user.access_roles.first().role_name if self.user.access_roles.first() else None,
+            "role": self.user.access_roles.first().role.role_name if self.user.access_roles.first() else None,
         }
         data = {"user": user_details, **token_data}
         return data
