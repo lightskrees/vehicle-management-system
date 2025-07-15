@@ -748,7 +748,29 @@ class IssueReportViewSet(MultipleSerializerAPIMixin, ModelViewSet):
                     )
             return None
 
-    @action(detail=True, methods=["POST"], url_path="set-cost/")
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"success": True, "response_message": _("Issue report updated.")},
+                status=status.HTTP_200_OK,
+            )
+        else:
+            for field, messages in serializer.errors.items():
+                for message in messages:
+                    return Response(
+                        {
+                            "success": False,
+                            "response_message": _(f"{message}"),
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            return None
+
+    @action(detail=True, methods=["PATCH"], url_path="set-cost/")
     def set_cost(self, request, *args, **kwargs):
         try:
             issue_obj = self.get_object()
@@ -774,7 +796,7 @@ class IssueReportViewSet(MultipleSerializerAPIMixin, ModelViewSet):
                 pending_maintenance.payment_amount = total
                 pending_maintenance.save()
 
-            return Response({"success": True, "response_message": _("cost set.")}, status=status.HTTP_200_OK)
+            return Response({"success": True, "response_message": _("cost updated.")}, status=status.HTTP_200_OK)
         except (Exception, ValueError) as e:
             return Response(
                 {
