@@ -577,6 +577,13 @@ class CustomVehicleList(APIView):
             "response_message": _("An unexpected error occurred. Please Contact the administrator."),
             "response_data": [],
         }
+
+        if auth_user.is_superuser:
+            response_data["success"] = True
+            response_data["response_message"] = _("Success")
+            response_data["response_data"] = VehicleSerializer(self.get_queryset(), many=True).data
+            return Response(response_data, status=status.HTTP_200_OK)
+
         try:
             vehicle_technician = VehicleTechnician.objects.get(user=auth_user)
             managed_vehicles = Vehicle.objects.filter(
