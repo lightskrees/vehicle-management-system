@@ -97,6 +97,7 @@ class Partnership(TimeStampModel):
     end_date = models.DateField(null=True, blank=True, verbose_name=_("End Date"))
     status = models.CharField(max_length=50, choices=Status.choices, default=Status.ACTIVE)
     is_permanent_partner = models.BooleanField(default=False)
+    contract_file = models.FileField(upload_to="partnership/", null=True, blank=True)
     description = models.CharField(max_length=250, null=True, blank=True)
 
     def __str__(self):
