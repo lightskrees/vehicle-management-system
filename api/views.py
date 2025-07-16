@@ -27,6 +27,7 @@ from api.serializers import (  # ListFuelSerializer,
     ListIssueReportSerializer,
     ListUserSerializer,
     ListVehicleDriverAssignmentSerializer,
+    ListVehicleMaintenanceSerializer,
     ListVehicleSerializer,
     PartnerCreateSerializer,
     PartnerListSerializer,
@@ -816,6 +817,7 @@ class VehicleMaintenanceViewSet(MultipleSerializerAPIMixin, ModelViewSet):
 
     queryset = VehicleMaintenance.objects.all()
     serializer_class = VehicleMaintenanceSerializer
+    list_serializer_class = ListVehicleMaintenanceSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)

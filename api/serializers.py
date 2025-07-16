@@ -273,46 +273,6 @@ class DocumentCreateSerializer(serializers.ModelSerializer):
         ]
 
 
-# ===============================
-# VEHICLE MAINTENANCE SERIALIZERS
-# ================================
-
-
-class VehicleMaintenanceSerializer(serializers.ModelSerializer):
-    issue_reports = serializers.PrimaryKeyRelatedField(
-        queryset=IssueReport.objects.filter(is_fixed=False), many=True, read_only=False
-    )
-    partner = serializers.PrimaryKeyRelatedField(queryset=Partner.objects.all(), allow_null=True, required=False)
-
-    class Meta:
-        model = VehicleMaintenance
-        fields = ["name", "issue_reports", "maintenance_begin_date", "partner"]
-
-
-class DocumentListSerializer(serializers.ModelSerializer):
-    issued_driver = DriverSerializer(read_only=True)
-    issued_vehicle = VehicleSerializer(read_only=True)
-    issuing_authority = PartnerListSerializer(read_only=True)
-
-    class Meta:
-        model = Document
-        fields = [
-            "id",
-            "name",
-            "document_type",
-            "document_category",
-            "issued_to",
-            "issued_vehicle",
-            "issued_driver",
-            "is_renewable",
-            "validity_period",
-            "renewal_frequency",
-            "issuing_authority",
-            "exp_begin_date",
-            "exp_end_date",
-        ]
-
-
 class IssueReportSerializer(serializers.ModelSerializer):
     name = serializers.CharField(allow_null=True, required=False)
     vehicle = serializers.PrimaryKeyRelatedField(queryset=Vehicle.objects.all(), read_only=False)
@@ -352,9 +312,57 @@ class ListIssueReportSerializer(IssueReportSerializer):
 
     class Meta(IssueReportSerializer.Meta):
         model = IssueReport
-        fields = ["id"] + IssueReportSerializer.Meta.fields
+        fields = ["id", "is_fixed"] + IssueReportSerializer.Meta.fields
 
     def validate_name(self, obj):
         if not self.name:
             self.name = "Issue Report"
         return self.name
+
+
+# ===============================
+# VEHICLE MAINTENANCE SERIALIZERS
+# ================================
+
+
+class VehicleMaintenanceSerializer(serializers.ModelSerializer):
+    issue_reports = serializers.PrimaryKeyRelatedField(
+        queryset=IssueReport.objects.filter(is_fixed=False), many=True, read_only=False
+    )
+    partner = serializers.PrimaryKeyRelatedField(queryset=Partner.objects.all(), allow_null=True, required=False)
+
+    class Meta:
+        model = VehicleMaintenance
+        fields = ["name", "issue_reports", "maintenance_begin_date", "maintenance_end_date", "partner", "status"]
+
+
+class ListVehicleMaintenanceSerializer(VehicleMaintenanceSerializer):
+    issue_reports = ListIssueReportSerializer(many=True, read_only=True)
+    partner = PartnerListSerializer(read_only=True)
+
+    class Meta(VehicleMaintenanceSerializer.Meta):
+        fields = ["id"] + VehicleMaintenanceSerializer.Meta.fields + ["payment_amount"]
+
+
+class DocumentListSerializer(serializers.ModelSerializer):
+    issued_driver = DriverSerializer(read_only=True)
+    issued_vehicle = VehicleSerializer(read_only=True)
+    issuing_authority = PartnerListSerializer(read_only=True)
+
+    class Meta:
+        model = Document
+        fields = [
+            "id",
+            "name",
+            "document_type",
+            "document_category",
+            "issued_to",
+            "issued_vehicle",
+            "issued_driver",
+            "is_renewable",
+            "validity_period",
+            "renewal_frequency",
+            "issuing_authority",
+            "exp_begin_date",
+            "exp_end_date",
+        ]
