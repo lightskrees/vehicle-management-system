@@ -728,8 +728,11 @@ class IssueReportViewSet(MultipleSerializerAPIMixin, ModelViewSet):
     def get_queryset(self):
         # we only display reports that have been rejected (they can be reviewed)...
         REJECTED = VehicleMaintenance.Status.REJECTED
-        qs = IssueReport.objects.filter(is_fixed=False).filter(
-            Q(maintenance__isnull=True) | Q(maintenance__status=REJECTED)
+        PENDING = VehicleMaintenance.Status.PENDING
+        qs = (
+            IssueReport.objects.filter(is_fixed=False)
+            .filter(Q(maintenance__isnull=True) | Q(maintenance__status=REJECTED) | Q(maintenance__status=PENDING))
+            .distinct()
         )
         return qs
 
@@ -791,18 +794,18 @@ class IssueReportViewSet(MultipleSerializerAPIMixin, ModelViewSet):
             issue_cost = request.data.get("issue_cost")
             issue_obj.set_cost(float(issue_cost))
 
-            # update the final costs in the maintenance instance
-            PENDING = VehicleMaintenance.Status.PENDING
-            pending_maintenances = issue_obj.maintenances.filter(status=PENDING, maintenance_end_date__isnull=False)
-            for pending_maintenance in pending_maintenances:
-                issue_reports = pending_maintenance.issue_reports.all()
-                total = 0
-                for report in issue_reports:
-                    total += (
-                        report.issue_cost if report.issue_cost else 0
-                    )  # to avoid value error in the computing process...
-                pending_maintenance.payment_amount = total
-                pending_maintenance.save()
+            # # update the final costs in the maintenance instance
+            # PENDING = VehicleMaintenance.Status.PENDING
+            # pending_maintenances = issue_obj.maintenances.filter(status=PENDING, maintenance_end_date__isnull=False)
+            # for pending_maintenance in pending_maintenances:
+            #     issue_reports = pending_maintenance.issue_reports.all()
+            #     total = 0
+            #     for report in issue_reports:
+            #         total += (
+            #             report.issue_cost if report.issue_cost else 0
+            #         )  # to avoid value error in the computing process...
+            #     pending_maintenance.payment_amount = total
+            #     pending_maintenance.save()
 
             return Response({"success": True, "response_message": _("cost updated.")}, status=status.HTTP_200_OK)
         except (Exception, ValueError) as e:
@@ -847,6 +850,55 @@ class VehicleMaintenanceViewSet(MultipleSerializerAPIMixin, ModelViewSet):
                             "success": False,
                             "response_message": _(f"{message}"),
                         }
+                    )
+            return None
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"success": True, "response_message": _("Maintenance updated.")},
+            )
+        else:
+            for field, messages in serializer.errors.items():
+                for message in messages:
+                    return Response(
+                        {
+                            "success": False,
+                            "response_message": _(f"{message}"),
+                        }
+                    )
+            return None
+
+    @action(detail=True, methods=["PATCH"], url_path="update-status/")
+    def update_status(self, request, *args, **kwargs):
+
+        maintenance = self.get_object()
+        serializer = self.get_serializer(maintenance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            if serializer.validated_data["status"] == VehicleMaintenance.Status.APPROVED:
+                maintenance.issue_reports.update(is_fixed=True)
+                issue_reports = maintenance.issue_reports.values_list("id", flat=True)
+                VehicleMaintenance.objects.filter(
+                    status=VehicleMaintenance.Status.PENDING, issue_reports__in=list(issue_reports)
+                ).exclude(id=maintenance.id).update(status=VehicleMaintenance.Status.REJECTED)
+            return Response(
+                {"success": True, "response_message": _("Status updated.")},
+                status=status.HTTP_200_OK,
+            )
+        else:
+            for field, messages in serializer.errors.items():
+                for message in messages:
+                    return Response(
+                        {
+                            "success": False,
+                            "response_message": _(f"{message}"),
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
                     )
             return None
 
