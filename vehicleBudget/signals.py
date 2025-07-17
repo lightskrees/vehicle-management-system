@@ -29,7 +29,7 @@ def create_clone_in_financial_records(sender, instance: VehicleMaintenance, crea
         and instance.status == sender.Status.APPROVED
         and instance.maintenance_end_date
     ):
-        if created:
+        if not created:
             FinancialRecord.objects.create(vehicle_maintenance=instance, **payment_details)
         else:
             FinancialRecord.objects.filter(id=instance.id).update(vehicle_maintenance=instance, **payment_details)
