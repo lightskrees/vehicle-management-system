@@ -79,7 +79,7 @@ class UpdateDriverSerializer(serializers.ModelSerializer):
 class TokenSerializer(TokenObtainPairSerializer):
 
     default_error_messages = {
-        "no_active_account": _("Votre compte est inactif. Veuillez contacter l' administrateur.")
+        "no_active_account": _("Aucun compte actif trouvé avec les informations d'identification fournies.")
     }
 
     @classmethod
