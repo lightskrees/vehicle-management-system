@@ -1022,7 +1022,14 @@ class VehicleHistoryViewSet(viewsets.ViewSet):
         }
 
         # Driver Assignments
-        assignments = vehicle.assignments.all().order_by("-begin_at")
+        assignments = VehicleDriverAssignment.objects.none()
+        if hasattr(user, "driver"):
+            driver = user.driver
+            assignments = vehicle.assignments.filter(driver=driver).order_by("-begin_at")
+
+        elif user.is_superuser:
+            assignments = vehicle.assignments.all().order_by("-begin_at")
+
         driver_assignments = [
             {
                 "driver": assignment.driver.user.full_name,
