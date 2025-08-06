@@ -919,7 +919,7 @@ class VehicleMaintenanceViewSet(MultipleSerializerAPIMixin, ModelViewSet):
 
 
 class SystemDashboardView(APIView):
-    permission_classes = [IsAuthenticated]  # Changed from IsAdminUser to allow all authenticated users
+    permission_classes = [IsAdminUser]  # Changed from IsAdminUser to allow all authenticated users
 
     def get(self, request, *args, **kwargs):
         today = timezone.now().date()
