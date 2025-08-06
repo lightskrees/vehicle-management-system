@@ -6,14 +6,17 @@ from api.views import (
     AddUserView,
     CustomVehicleList,
     DocumentManagementViewSet,
+    DriverDashboardView,
     DriverListView,
     DriverViewSet,
+    FinancialControllerDashboardView,
     FuelViewSet,
     IssueReportViewSet,
     PartnerConfigurationViewSet,
     PartnershipManagementViewSet,
     RegisterDriverApiView,
     SystemDashboardView,
+    TechnicianDashboardView,
     TokenPairView,
     UserAPIViewSet,
     VehicleAssignmentsManagementViewSet,
@@ -67,4 +70,7 @@ urlpatterns = [
     # DASHBOARD VIEW
     #####################
     path("dashboard/", SystemDashboardView.as_view(), name="system-dashboard"),
+    path("dashboard/driver/", DriverDashboardView.as_view(), name="driver-dashboard"),
+    path("dashboard/technician/", TechnicianDashboardView.as_view(), name="technician-dashboard"),
+    path("dashboard/financial/", FinancialControllerDashboardView.as_view(), name="financial-dashboard"),
 ]

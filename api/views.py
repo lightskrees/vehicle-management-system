@@ -45,7 +45,7 @@ from api.serializers import (  # ListFuelSerializer,
 from api.utils import send_email
 from authentication.models import AccessRole, AppUser, Driver, Role
 from management.models import Vehicle, VehicleDriverAssignment, VehicleTechnician
-from vehicleBudget.models import DocumentCost, VehicleMaintenance
+from vehicleBudget.models import DocumentCost, FuelConsumption, VehicleMaintenance
 from vehicleHub.models import Document, Fuel, IssueReport, Partner, Partnership
 
 
@@ -919,58 +919,107 @@ class VehicleMaintenanceViewSet(MultipleSerializerAPIMixin, ModelViewSet):
 
 
 class SystemDashboardView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]  # Changed from IsAdminUser to allow all authenticated users
 
     def get(self, request, *args, **kwargs):
         today = timezone.now().date()
         thirty_days_from_now = today + timedelta(days=30)
+        user = request.user
 
-        # SYSTEM STATISTICS
-        system_stats = {
-            "total_vehicles": Vehicle.objects.count(),
-            "total_drivers": Driver.objects.count(),
-            "total_technicians": VehicleTechnician.objects.count(),
-            "active_assignments": VehicleDriverAssignment.objects.filter(
-                assignment_status=VehicleDriverAssignment.AssignmentStatus.ACTIVE
-            ).count(),
-        }
+        # SYSTEM STATISTICS - Only for admin
+        system_stats = {}
+        if user.is_superuser:
+            system_stats = {
+                "total_vehicles": Vehicle.objects.count(),
+                "total_drivers": Driver.objects.count(),
+                "total_technicians": VehicleTechnician.objects.count(),
+                "active_assignments": VehicleDriverAssignment.objects.filter(
+                    assignment_status=VehicleDriverAssignment.AssignmentStatus.ACTIVE
+                ).count(),
+            }
 
-        # USER STATISTICS
-        user_stats = {
-            "total_users": AppUser.objects.count(),
-            "active_users": AppUser.objects.filter(is_active=True).count(),
-            "inactive_users": AppUser.inactive.count(),
-            "admin_users": AppUser.objects.filter(is_superuser=True).count(),
-            # 'role_distribution': Role.objects.annotate(user_count=Count('role')),  #ToDo: to be implemented soon...
-            "role_count": Role.objects.count(),
-        }
+        # USER STATISTICS - Only for admin
+        user_stats = {}
+        if user.is_superuser:
+            user_stats = {
+                "total_users": AppUser.objects.count(),
+                "active_users": AppUser.objects.filter(is_active=True).count(),
+                "inactive_users": AppUser.inactive.count(),
+                "admin_users": AppUser.objects.filter(is_superuser=True).count(),
+                "role_count": Role.objects.count(),
+            }
 
-        # VEHICLE STATISTICS
-        vehicle_stats = {
-            "vehicle_types": Vehicle.objects.values("vehicle_type").annotate(count=Count("vehicle_type")),
-            "vehicles_needing_service": Vehicle.objects.filter(
-                last_service_date__lt=today - timedelta(days=90)
-            ).count(),
-            "unassigned_vehicles": Vehicle.objects.filter(assignment__isnull=True).count(),
-        }
+        # VEHICLE STATISTICS - Customized by role
+        vehicle_stats = {}
+        try:
+            if hasattr(user, "technician"):
+                # For technician
+                technician = user.technician
+                vehicle_stats = {
+                    "assigned_vehicles": Vehicle.objects.filter(managing_technician=technician).count(),
+                    "total_maintenances": VehicleMaintenance.objects.filter(
+                        issue_reports__vehicle__managing_technician=technician
+                    )
+                    .distinct()
+                    .count(),
+                    "vehicles_needing_service": Vehicle.objects.filter(
+                        managing_technician=technician, last_service_date__lt=today - timedelta(days=90)
+                    ).count(),
+                    "pending_issues": IssueReport.objects.filter(
+                        vehicle__managing_technician=technician, is_fixed=False
+                    ).count(),
+                }
+            elif user.is_superuser:
+                # For admin
+                vehicle_stats = {
+                    "vehicle_types": Vehicle.objects.values("vehicle_type").annotate(count=Count("vehicle_type")),
+                    "vehicles_needing_service": Vehicle.objects.filter(
+                        last_service_date__lt=today - timedelta(days=90)
+                    ).count(),
+                    "unassigned_vehicles": Vehicle.objects.filter(assignment__isnull=True).count(),
+                }
+        except VehicleTechnician.DoesNotExist:
+            pass
 
-        # DRIVER STATISTICS
-        driver_stats = {
-            "license_categories": Driver.objects.values("license_category").annotate(count=Count("license_category")),
-            "expiring_licenses": Driver.objects.filter(expiry_date__range=[today, thirty_days_from_now]).count(),
-            "active_drivers": Driver.objects.filter(
-                assignment__assignment_status=VehicleDriverAssignment.AssignmentStatus.ACTIVE
-            )
-            .distinct()
-            .count(),
-        }
+        # DRIVER STATISTICS - Customized by role
+        driver_stats = {}
+        try:
+            if hasattr(user, "driver"):
+                # For driver
+                driver = user.driver
+                driver_stats = {
+                    "total_assignments": VehicleDriverAssignment.objects.filter(driver=driver).count(),
+                    "active_assignments": VehicleDriverAssignment.objects.filter(
+                        driver=driver, assignment_status=VehicleDriverAssignment.AssignmentStatus.ACTIVE
+                    ).count(),
+                    # "reported_issues": IssueReport.objects.filter(created_by=user).count(),
+                    "license_expiry": driver.expiry_date,
+                }
+            elif user.is_superuser:
+                # For admin
+                driver_stats = {
+                    "license_categories": Driver.objects.values("license_category").annotate(
+                        count=Count("license_category")
+                    ),
+                    "expiring_licenses": Driver.objects.filter(
+                        expiry_date__range=[today, thirty_days_from_now]
+                    ).count(),
+                    "active_drivers": Driver.objects.filter(
+                        assignment__assignment_status=VehicleDriverAssignment.AssignmentStatus.ACTIVE
+                    )
+                    .distinct()
+                    .count(),
+                }
+        except Driver.DoesNotExist:
+            pass
 
-        # System Health
-        system_health = {
-            "database_status": "Connected",
-            # 'redis_status': check_redis_connection(),
-            "celery_status": check_celery_status(),
-        }
+        # System Health - Only for admin
+        system_health = {}
+        if user.is_superuser:
+            system_health = {
+                "database_status": "Connected",
+                "celery_status": check_celery_status(),
+            }
 
         return Response(
             {
@@ -1162,3 +1211,143 @@ class VehicleHistoryViewSet(viewsets.ViewSet):
         }
 
         return Response(overall_data)
+
+
+class DriverDashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            if not hasattr(request.user, "driver"):
+                return Response({"error": "User is not a driver"}, status=403)
+
+            driver = request.user.driver
+            today = timezone.now().date()
+
+            # Get current active assignment
+            current_assignment = VehicleDriverAssignment.objects.filter(
+                driver=driver, assignment_status=VehicleDriverAssignment.AssignmentStatus.ACTIVE
+            ).first()
+
+            # Historical data
+            historical_data = {
+                "total_assignments": VehicleDriverAssignment.objects.filter(driver=driver).count(),
+                "total_vehicles_driven": VehicleDriverAssignment.objects.filter(driver=driver)
+                .values("vehicle")
+                .distinct()
+                .count(),
+                # "total_active_days": (today - driver.user.created_at.date()).days if driver.user.created_at else 0,
+            }
+
+            # Current status
+            current_status = {
+                "current_vehicle": (
+                    {
+                        "make": current_assignment.vehicle.make,
+                        "model": current_assignment.vehicle.model,
+                        "license_plate": current_assignment.vehicle.license_plate_number,
+                    }
+                    if current_assignment
+                    else None
+                ),
+                "license_expiry_in_days": (driver.expiry_date - today).days if driver.expiry_date else None,
+                "active_assignment": bool(current_assignment),
+            }
+
+            return Response({"historical_data": historical_data, "current_status": current_status})
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
+
+
+class TechnicianDashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            if not hasattr(request.user, "technician"):
+                return Response({"error": "User is not a technician"}, status=403)
+
+            technician = request.user.technician
+            today = timezone.now().date()
+
+            # Current workload
+            current_workload = {
+                "assigned_vehicles": Vehicle.objects.filter(
+                    managing_technician=technician, managing_technician__end_date__isnull=True
+                ).count(),
+                "pending_issues": IssueReport.objects.filter(
+                    vehicle__managing_technician=technician, is_fixed=False
+                ).count(),
+                "vehicles_needing_service": Vehicle.objects.filter(
+                    managing_technician=technician, last_service_date__lt=today - timedelta(days=90)
+                ).count(),
+            }
+
+            # Performance metrics
+            performance_metrics = {
+                "total_maintenances_completed": VehicleMaintenance.objects.filter(
+                    issue_reports__vehicle__managing_technician=technician, status=VehicleMaintenance.Status.APPROVED
+                )
+                .distinct()
+                .count(),
+                "total_issues_resolved": IssueReport.objects.filter(
+                    vehicle__managing_technician=technician, is_fixed=True
+                ).count(),
+            }
+
+            return Response({"current_workload": current_workload, "performance_metrics": performance_metrics})
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
+
+
+class FinancialControllerDashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            today = timezone.now().date()
+
+            # Maintenance costs
+            maintenance_stats = {
+                "pending_maintenances": VehicleMaintenance.objects.filter(
+                    status=VehicleMaintenance.Status.PENDING
+                ).count(),
+                "active_maintenances": VehicleMaintenance.objects.filter(
+                    status=VehicleMaintenance.Status.APPROVED, maintenance_end_date__isnull=True
+                ).count(),
+                "total_maintenance_cost": VehicleMaintenance.objects.filter(
+                    status=VehicleMaintenance.Status.APPROVED
+                ).aggregate(total=Sum("payment_amount"))["total"]
+                or 0,
+            }
+
+            # Vehicle costs
+            vehicle_costs = {
+                "total_fuel_cost": FuelConsumption.objects.aggregate(total=Sum("fuel_cost"))["total"] or 0,
+                "total_document_cost": DocumentCost.objects.aggregate(total=Sum("payment_amount"))["total"] or 0,
+            }
+
+            # Financial overview
+            financial_overview = {
+                "total_expenses": maintenance_stats["total_maintenance_cost"]
+                + vehicle_costs["total_fuel_cost"]
+                + vehicle_costs["total_document_cost"],
+                "expense_breakdown": {
+                    "maintenance": maintenance_stats["total_maintenance_cost"],
+                    "fuel": vehicle_costs["total_fuel_cost"],
+                    "documents": vehicle_costs["total_document_cost"],
+                },
+            }
+
+            return Response(
+                {
+                    "maintenance_stats": maintenance_stats,
+                    "vehicle_costs": vehicle_costs,
+                    "financial_overview": financial_overview,
+                }
+            )
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
