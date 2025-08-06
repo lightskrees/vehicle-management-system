@@ -1018,6 +1018,7 @@ class VehicleHistoryViewSet(viewsets.ViewSet):
         vehicle history information
         """
         vehicle = self.get_vehicle(pk)
+        user = request.user
 
         # Basic Info
         # basic_info = ListVehicleSerializer(vehicle, context={"request": request}).data
