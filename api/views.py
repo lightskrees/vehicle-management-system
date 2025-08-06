@@ -353,6 +353,21 @@ class VehicleViewSet(MultipleSerializerAPIMixin, ModelViewSet):
     serializer_class = VehicleSerializer
     list_serializer_class = ListVehicleSerializer
 
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_superuser:
+            return Vehicle.objects.all()
+
+        elif hasattr(user, "driver"):
+            driver = user.driver
+            ACTIVE = VehicleDriverAssignment.AssignmentStatus.ACTIVE
+            return Vehicle.objects.filter(assignment__driver=driver, assignment__assignment_status=ACTIVE)
+
+        elif hasattr(user, "technician"):
+            technician = user.technician
+            return Vehicle.objects.filter(managing_technician=technician, managing_technician__end_date__isnull=False)
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
