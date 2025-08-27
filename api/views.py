@@ -840,7 +840,7 @@ class IssueReportViewSet(MultipleSerializerAPIMixin, ModelViewSet):
 
 class VehicleMaintenanceViewSet(MultipleSerializerAPIMixin, ModelViewSet):
 
-    queryset = VehicleMaintenance.objects.all()
+    queryset = VehicleMaintenance.objects.all().order_by("-created_at")
     serializer_class = VehicleMaintenanceSerializer
     list_serializer_class = ListVehicleMaintenanceSerializer
 
