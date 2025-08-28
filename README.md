@@ -1,6 +1,7 @@
 
 ---
-
+This repository is for academic purpose and is not for production usage.\
+It contains some APIs to be consumed by the client-side.
 ## Features
 - Manage vehicles (Add, Edit, Delete).
 - View detailed information about each vehicle.
