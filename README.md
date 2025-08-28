@@ -1,13 +1,6 @@
 
 ---
 
-# Vehicle Management System
-
-## Introduction
-The Vehicle Management System is a web-based application designed to streamline the management of vehicles for businesses or individuals. This system provides consumable APIs that allow users to interact with and manage a fleet of vehicles, including tracking, updating, and maintaining vehicle-related data.
-
-This project is developed using Django (Python), and to ensure consistency in our coding standards, we use a Git version control tool. The system is currently contributed by two authors, ensuring collaboration and shared expertise.
-
 ## Features
 - Manage vehicles (Add, Edit, Delete).
 - View detailed information about each vehicle.
@@ -93,8 +86,3 @@ Open your browser to view all the available APIs:
 ```
 http://127.0.0.1:8000/api/
 ```
-
-## Contributing
-This project is contributed by:
--  DUSHIME Chris-Nathan (lightskrees)
--  MUYIZIGIRE Clovis (clovdeveloper)
